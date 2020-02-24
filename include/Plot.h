@@ -21,8 +21,8 @@ static void plotCompare(std::string plotName, std::vector<Data> data, float aFit
     plotString += "set title '" + plotName + "' font ',20'\n";
     plotString += "set xlabel 'X'\n";
     plotString += "set ylabel 'Y'\n";
-    plotString += "plot '" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
-    plotString += "'" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'red', ";
+    plotString += "plot '" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'red', ";
+    plotString += "'" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
     plotString += std::to_string(aFit) + " * x**2 + " + std::to_string(bFit) + " * x + " + std::to_string(cFit) + " with lines";
 
     if(verbose)
@@ -31,6 +31,7 @@ static void plotCompare(std::string plotName, std::vector<Data> data, float aFit
     }
 
     gp.sendLine(plotString);
+    std::cout << "Class 0: black,  Class 1: red" << std::endl;
 }
 
 static void createDataFile(std::string plotFileName, std::vector<Data> data, int label)

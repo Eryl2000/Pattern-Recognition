@@ -5,6 +5,7 @@
 
 #include "ClassifierBase.h"
 #include "ClassifierCase1.h"
+#include "ClassifierCase3.h"
 #include "Eigen/Dense"
 #include "BoxMuller.h"
 #include "gnuplot.h"
@@ -12,7 +13,7 @@
 
 using namespace Eigen;
 
-void EvaluateData(const std::vector<Data> &data, ClassifierBase *classifier);
+void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier);
 
 int main()
 {
@@ -85,29 +86,29 @@ int main()
 
     ClassifierBase *classifier1 = new ClassifierCase1(mean1, covariance1, priorProb1);
     ClassifierBase *classifier2 = new ClassifierCase1(mean1, covariance1, priorProb2);
-    //ClassifierBase *classifier3 = new ClassifierCase3(mean2, covariance2, priorProb1);
-    //ClassifierBase *classifier4 = new ClassifierCase3(mean2, covariance2, priorProb2);
-    ClassifierBase *classifier5 = new ClassifierCase1(mean2, covariance2, priorProb1);
-    std::cout << "\nProblem 1a" << std::endl; 
-    EvaluateData(points1, classifier1);
-    std::cout << "\nProblem 1b" << std::endl; 
-    EvaluateData(points1, classifier2);
-    std::cout << "\nProblem 2a" << std::endl; 
-    //EvaluateData(points2, classifier3);
-    std::cout << "\nProblem 2b" << std::endl; 
-    //EvaluateData(points2, classifier4);
-    std::cout << "\nProblem 3" << std::endl; 
-    EvaluateData(points2, classifier5);
+    ClassifierBase *classifier3 = new ClassifierCase3(mean2, covariance2, priorProb1);
+    ClassifierBase *classifier4 = new ClassifierCase3(mean2, covariance2, priorProb2);
+    ClassifierBase *classifier5 = new ClassifierCase1(mean2, covariance1, priorProb1);
+    std::cout << "\nProblem 1a" << std::endl;
+    EvaluateData("Problem 1a", points1, classifier1);
+    std::cout << "\nProblem 1b" << std::endl;
+    EvaluateData("Problem 1b", points1, classifier2);
+    std::cout << "\nProblem 2a" << std::endl;
+    EvaluateData("Problem 2a", points2, classifier3);
+    std::cout << "\nProblem 2b" << std::endl;
+    EvaluateData("Problem 2ba", points2, classifier4);
+    std::cout << "\nProblem 3" << std::endl;
+    EvaluateData("Problem 3", points2, classifier5);
 
     delete(classifier1);
     delete(classifier2);
-    //delete(classifier3);
-    //delete(classifier4);
+    delete(classifier3);
+    delete(classifier4);
     delete(classifier5);
     return 0;
 }
 
-void EvaluateData(const std::vector<Data> &data, ClassifierBase *classifier){
+void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier){
     PlotParams plotParams = classifier->GetPlotParams();
     std::vector<MisclassificationData> misclassifications = classifier->GetMisclassification(data);
     int totalMisclassified = 0;
@@ -119,5 +120,5 @@ void EvaluateData(const std::vector<Data> &data, ClassifierBase *classifier){
     }
     std::cout << "  Total model misclassifications: " << totalMisclassified << " - (" << 100.0f * totalMisclassified / data.size() << "%)" << std::endl;
     std::cout << "  Bhattacharyya error bound: " << 100.0f * classifier->GetErrorBound() << "%" << std::endl;
-    plotCompare("Plot", data, plotParams.a, plotParams.b, plotParams.c);
+    plotCompare(name, data, plotParams.a, plotParams.b, plotParams.c);
 }
