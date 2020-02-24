@@ -1,6 +1,9 @@
 #include <iostream>
 #include "ClassifierBase.h"
 #include "Eigen/Dense"
+#include "matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
 
 using namespace Eigen;
 
@@ -13,4 +16,7 @@ int main()
     v << 1, 2, 3;
     std::cout << "m * v =" << std::endl << m * v << std::endl;
     std::cout << "Hello world" << std::endl;
+
+    plt::plot({1,3,2,4});
+    plt::show();
 }
