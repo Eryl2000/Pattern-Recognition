@@ -1,9 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
+#include "ClassifierBase.h"
+
+using namespace Eigen;
 
 int main()
 {
-	using namespace Eigen;
     MatrixXd m = MatrixXd::Random(3,3);
     m = (m + MatrixXd::Constant(3,3,1.2)) * 50;
     std::cout << "m =" << std::endl << m << std::endl;
