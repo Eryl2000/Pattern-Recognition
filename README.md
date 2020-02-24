@@ -1,6 +1,7 @@
 # Installation
 ```bash
-sudo apt-get install python-matplotlib python-numpy python2.7-dev
+gnuplot5.2.8
+Eigen (header files are included in the project so you do not need to install this)
 ```
 
 # Running
