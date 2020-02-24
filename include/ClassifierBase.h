@@ -9,6 +9,10 @@ using namespace Eigen;
 class Data
 {
 public:
+    Data(int featureSize)
+    {
+        feature.resize(featureSize);
+    }
     VectorXf feature;
     int label;
 };
