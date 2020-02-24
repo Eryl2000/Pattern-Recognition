@@ -14,55 +14,99 @@ using namespace Eigen;
 
 int main()
 {
-    MatrixXd m = MatrixXd::Random(3,3);
-    m = (m + MatrixXd::Constant(3,3,1.2)) * 50;
-    std::cout << "m =" << std::endl << m << std::endl;
-    VectorXd v(3);
-    v << 1, 2, 3;
-    std::cout << "m * v =" << std::endl << m * v << std::endl;
-    std::cout << "Hello world" << std::endl;
-
+    //Data set 1
     std::vector<VectorXf> mean1;
     mean1.push_back(VectorXf(2));
     mean1[0] << 1.0f, 1.0f;
     mean1.push_back(VectorXf(2));
     mean1[1] << 4.0f, 4.0f;
-    
+
     std::vector<MatrixXf> covariance1;
     covariance1.push_back(MatrixXf(2, 2));
     covariance1[0] << 1, 0,
                       0, 1;
 
+    //Data set 2
+    std::vector<VectorXf> mean2;
+    mean2.push_back(VectorXf(2));
+    mean2[0] << 1.0f, 1.0f;
+    mean2.push_back(VectorXf(2));
+    mean2[1] << 4.0f, 4.0f;
+
+    std::vector<MatrixXf> covariance2;
+    covariance2.push_back(MatrixXf(2, 2));
+    covariance2[0] << 1, 0,
+                      0, 1;
+    covariance2.push_back(MatrixXf(2, 2));
+    covariance2[0] << 4, 0,
+                      0, 8;
+
+
     std::vector<float> priorProb1;
     priorProb1.push_back(0.5f);
     priorProb1.push_back(0.5f);
 
-    ClassifierCase1(mean1, covariance1, priorProb1);
+    std::vector<float> priorProb2;
+    priorProb2.push_back(0.2f);
+    priorProb2.push_back(0.8f);
 
-    std::vector<Data> points1;
-    points1.reserve(100);
-    std::vector<Data> points2;
-    points2.reserve(100);
-
-    for(int i = 0; i < 100; i++)
+    long numberOfPoints = 100000;
+    std::vector<Data> points1a;
+    points1a.reserve(numberOfPoints);
+    std::vector<Data> points1b;
+    points1b.reserve(numberOfPoints);
+    std::vector<Data> points2a;
+    points2a.reserve(numberOfPoints);
+    std::vector<Data> points2b;
+    points2b.reserve(numberOfPoints);
+    for(long int i = 0; i < numberOfPoints; ++i)
     {
-        Data d(2);
-        float x = box_muller(1, 1);
-        float y = box_muller(1, 1);
+        //Data set 1
+        Data d1(2);
+        float x = box_muller(mean1[0](0, 0), covariance1[0](0, 0));
+        float y = box_muller(mean1[0](1, 0), covariance1[0](1, 1));
+        d1.feature(0, 0) = x;
+        d1.feature(1, 0) = y;
+        d1.label = 0;
+        points1a.push_back(d1);
 
-        d.feature[0] = x;
-        d.feature[1]  = y;
+        Data d2(2);
+        x = box_muller(mean1[1](0, 0), covariance1[0](0, 0));
+        y = box_muller(mean1[1](1, 0), covariance1[0](1, 1));
+        d2.feature(0, 0) = x;
+        d2.feature(1, 0) = y;
+        d2.label = 1;
+        points1b.push_back(d2);
 
-        points1.push_back(d);
+        //Data set 2
+        Data d3(2);
+        x = box_muller(mean2[0](0, 0), covariance2[0](0, 0));
+        y = box_muller(mean2[0](1, 0), covariance2[0](1, 1));
+        d3.feature(0, 0) = x;
+        d3.feature(1, 0) = y;
+        d3.label = 0;
+        points2a.push_back(d3);
 
-        x = box_muller(4, 1);
-        y = box_muller(4, 1);
-
-        d.feature[0] = x;
-        d.feature[1]  = y;
-
-        points2.push_back(d);
+        Data d4(2);
+        x = box_muller(mean2[1](0, 0), covariance2[1](0, 0));
+        y = box_muller(mean2[1](1, 0), covariance2[1](1, 1));
+        d4.feature(0, 0) = x;
+        d4.feature(1, 0) = y;
+        d4.label = 1;
+        points2b.push_back(d4);
     }
 
-    plotCompare("Test Plot", points1, points2, 0, 1, 0);
+
+
+    ClassifierCase1 classifier1(mean1, covariance1, priorProb1);
+    ClassifierCase1 classifier2(mean1, covariance1, priorProb2);
+    //ClassifierCase3 classifier3(mean2, covariance2, priorProb1);
+    //ClassifierCase3 classifier4(mean2, covariance2, priorProb2);
+    //ClassifierCase1 classifier5(mean2, covariance2, priorProb2);
+
+
+    PlotParams points1Params_a = classifier1.GetPlotParams();
+    plotCompare("Plot1a", points1a, points1b, points1Params_a.a, points1Params_a.b, points1Params_a.c);
+    PlotParams points1Params_b = classifier2.GetPlotParams();
+    plotCompare("Plot1b", points1a, points1b, points1Params_b.a, points1Params_b.b, points1Params_b.c);
 }

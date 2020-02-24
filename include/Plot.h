@@ -5,10 +5,10 @@
 #include "ClassifierBase.h"
 #include "gnuplot.h"
 
-static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, int aFit, int bFit, int cFit, bool verbose);
+static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, float aFit, float bFit, float cFit, bool verbose);
 static void createDataFile(std::string plotFileName, std::vector<Data> data);
 
-static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, int aFit, int bFit, int cFit, bool verbose=false)
+static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, float aFit, float bFit, float cFit, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
     std::string class2FileName = "plots/" + plotName + "_c2.dat";
@@ -19,10 +19,10 @@ static void plotCompare(std::string plotName, std::vector<Data> class1, std::vec
     GnuplotPipe gp;
     std::string plotString;
     plotString += "set title '" + plotName + "' font ',20'\n";
-    plotString += "set xlabel 'Feature 1'\n";
-    plotString += "set ylabel 'Feature 2'\n";
-    plotString += "plot '" + class1FileName + "' with points pt 7, ";
-    plotString += "'" + class2FileName + "' with points pt 7, ";
+    plotString += "set xlabel 'X'\n";
+    plotString += "set ylabel 'Y'\n";
+    plotString += "plot '" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
+    plotString += "'" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'blue', ";
     plotString += std::to_string(aFit) + " * x**2 + " + std::to_string(bFit) + " * x + " + std::to_string(cFit) + " with lines";
 
     if(verbose)
