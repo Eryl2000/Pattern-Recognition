@@ -30,14 +30,19 @@ int main()
     
     std::vector<MatrixXf> covariance1;
     covariance1.push_back(MatrixXf(2, 2));
+    covariance1.push_back(MatrixXf(2, 2));
     covariance1[0] << 1, 0,
+                      0, 1;
+    covariance1[1] << 1, 0,
                       0, 1;
 
     std::vector<float> priorProb1;
     priorProb1.push_back(0.5f);
     priorProb1.push_back(0.5f);
 
-    ClassifierCase1(mean1, covariance1, priorProb1);
+    ClassifierCase1 classifer(mean1, covariance1, priorProb1);
+
+    std::cout << "Error bound: " << classifer.GetErrorBound() << std::endl;
 
     std::vector<Data> points1;
     points1.reserve(100);

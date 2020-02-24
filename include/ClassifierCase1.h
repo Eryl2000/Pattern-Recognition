@@ -20,7 +20,7 @@ public:
     PlotParams GetPlotParams();
 
     //Returns the maximum error of the classifier
-    float GetErrorBound();
+    //float GetErrorBound();
 
 protected:
     VectorXf W;
