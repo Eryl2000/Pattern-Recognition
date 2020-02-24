@@ -19,9 +19,14 @@ public:
 
 class PlotParams{
 public:
-    float a;
+    bool linear;
+    float m;
     float b;
-    float c;
+    
+    float p1;
+    float p2;
+    float p3;
+    float p4;
 };
 
 class MisclassificationData{

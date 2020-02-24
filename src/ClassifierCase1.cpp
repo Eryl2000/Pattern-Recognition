@@ -1,4 +1,4 @@
-#include <bits/stdc++.h> 
+#include <bits/stdc++.h>
 #include "ClassifierCase1.h"
 
 
@@ -22,8 +22,8 @@ int ClassifierCase1::Classify(const VectorXf &input){
 //Returns the parameters for the decision boundary
 PlotParams ClassifierCase1::GetPlotParams(){
     PlotParams ret;
-    ret.a = 0;
-    ret.b = -W(0, 0) / W(1, 0);
-    ret.c = X0(1, 0) - ret.b * X0(0, 0);
+    ret.linear = true;
+    ret.m = -W(0, 0) / W(1, 0);
+    ret.b = X0(1, 0) - ret.b * X0(0, 0);
     return ret;
 }
