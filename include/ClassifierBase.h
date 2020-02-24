@@ -6,16 +6,6 @@
 
 using namespace Eigen;
 
-class ClassifierResults
-{
-public:
-    ClassifierResults(){
-        classificationIndex = -1;
-    }
-    std::vector<float> discriminants;
-    int classificationIndex;
-};
-
 class Data
 {
 public:
@@ -30,56 +20,56 @@ public:
     float c;
 };
 
-
-
+class MisclassificationData{
+public:
+    MisclassificationData(){
+        falsePositives = 0;
+        falseNegatives = 0;
+    }
+    int falsePositives;
+    int falseNegatives;
+};
 
 
 class ClassifierBase{
 public:
     ClassifierBase(const std::vector<VectorXf> &_means,
       const std::vector<MatrixXf> &_covariances,
-      const std::vector<float> &_priorProbabilities){
+      const std::vector<float> &_priorProb){
         means = _means;
         covariances = _covariances;
-        priorProbabilities = _priorProbabilities;
+        priorProb = _priorProb;
+        numberOfClasses = means.size();
     }
 
-    ClassifierResults Classify(const VectorXf &input){
-        ClassifierResults ret;
-        float highestDiscriminant = 0.0f;
-        for(unsigned int i = 0; i < means.size(); ++i){
-            ret.discriminants.push_back(discriminant(input, i));
-            if(ret.discriminants[i] > highestDiscriminant){
-                highestDiscriminant = ret.discriminants[i];
-                ret.classificationIndex = i;
-            }
-        }
-        return ret;
-    }
-
-    float GetErrorBound(){
-        return 0.0f; //TODO: Implement this
-    }
-
-    std::vector<int> GetMisclassification(const std::vector<Data> &data){
-        std::vector<int> errors(means.size(), 0);
+    //Returns the number of missclassified data-points 
+    std::vector<MisclassificationData> GetMisclassification(const std::vector<Data> &data){
+        std::vector<MisclassificationData> errors(numberOfClasses, MisclassificationData());
         for(auto dataPoint : data){
-            if(dataPoint.label != Classify(dataPoint.feature).classificationIndex){
-                errors[dataPoint.label]++;
+            int classification = Classify(dataPoint.feature);
+            if(classification != dataPoint.label){
+                errors[classification].falsePositives++;
+                errors[dataPoint.label].falseNegatives++;
             }
         }
         return errors;
     }
 
+    //Returns the index of the class the input belongs to
+    virtual int Classify(const VectorXf &input) = 0;
+
+    //Returns the parameters for the decision boundary
     virtual PlotParams GetPlotParams() = 0;
+
+    //Returns the maximum error of the classifier
+    virtual float GetErrorBound() = 0;
 
 protected:
     std::vector<VectorXf> means;
     std::vector<MatrixXf> covariances;
-    std::vector<float> priorProbabilities;
+    std::vector<float> priorProb;
 
-    virtual float discriminant(const VectorXf &input, int classIndex) = 0;
-
+    int numberOfClasses;
 };
 
 
