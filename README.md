@@ -1,7 +1,7 @@
 # Installation
 ```bash
-gnuplot5.2.8
-Eigen (header files are included in the project so you do not need to install this)
+gnuplot 5.2.8
+Eigen 3.3.7 (header files are included in the project so you do not need to install this though)
 ```
 
 # Running
