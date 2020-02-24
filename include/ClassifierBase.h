@@ -23,6 +23,13 @@ public:
     int label;
 };
 
+class PlotParams{
+public:
+    float a;
+    float b;
+    float c;
+};
+
 
 
 
@@ -63,6 +70,8 @@ public:
         }
         return errors;
     }
+
+    virtual PlotParams GetPlotParams() = 0;
 
 protected:
     std::vector<VectorXf> means;
