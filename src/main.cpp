@@ -1,6 +1,6 @@
 #include <iostream>
-#include <Eigen/Dense>
 #include "ClassifierBase.h"
+#include "Eigen/Dense"
 
 using namespace Eigen;
 
