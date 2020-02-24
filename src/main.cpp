@@ -1,9 +1,10 @@
 #include <iostream>
+#include <vector>
+#include <fstream>
 #include "ClassifierBase.h"
 #include "Eigen/Dense"
-#include "matplotlibcpp.h"
-
-namespace plt = matplotlibcpp;
+#include "BoxMuller.h"
+#include "gnuplot.h"
 
 using namespace Eigen;
 
@@ -17,6 +18,25 @@ int main()
     std::cout << "m * v =" << std::endl << m * v << std::endl;
     std::cout << "Hello world" << std::endl;
 
-    plt::plot({1,3,2,4});
-    plt::show();
+
+
+
+    /*
+
+    std::ofstream outFile;
+    outFile.open("scatter.dat");
+
+    for(int i = 0; i < 100; i++)
+    {
+        float x = box_muller(0, 1);
+        float y = box_muller(0, 1);
+        outFile << x << " " << y << std::endl;
+
+    }
+
+    GnuplotPipe gp;
+    gp.sendLine("plot 'scatter.dat' with points pt 7, x with lines");
+
+    outFile.close();
+    */
 }
