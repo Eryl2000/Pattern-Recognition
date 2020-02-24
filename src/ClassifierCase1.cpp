@@ -29,6 +29,8 @@ PlotParams ClassifierCase1::GetPlotParams(){
 }
 
 //Returns the maximum error of the classifier
+/*
 float ClassifierCase1::GetErrorBound(){
     return 0.0f; //TODO: implement this
 }
+*/

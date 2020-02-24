@@ -23,7 +23,10 @@ int main()
 
     std::vector<MatrixXf> covariance1;
     covariance1.push_back(MatrixXf(2, 2));
+    covariance1.push_back(MatrixXf(2, 2));
     covariance1[0] << 1, 0,
+                      0, 1;
+    covariance1[1] << 1, 0,
                       0, 1;
 
     //Data set 2
@@ -41,7 +44,7 @@ int main()
     covariance2[0] << 4, 0,
                       0, 8;
 
-
+    //Prior probabilities
     std::vector<float> priorProb1;
     priorProb1.push_back(0.5f);
     priorProb1.push_back(0.5f);
@@ -96,17 +99,18 @@ int main()
         points2b.push_back(d4);
     }
 
-
-
     ClassifierCase1 classifier1(mean1, covariance1, priorProb1);
     ClassifierCase1 classifier2(mean1, covariance1, priorProb2);
     //ClassifierCase3 classifier3(mean2, covariance2, priorProb1);
     //ClassifierCase3 classifier4(mean2, covariance2, priorProb2);
     //ClassifierCase1 classifier5(mean2, covariance2, priorProb2);
 
-
     PlotParams points1Params_a = classifier1.GetPlotParams();
     plotCompare("Plot1a", points1a, points1b, points1Params_a.a, points1Params_a.b, points1Params_a.c);
+    std::cout << "Error bound 1a: " << classifier1.GetErrorBound() << std::endl;
+
     PlotParams points1Params_b = classifier2.GetPlotParams();
     plotCompare("Plot1b", points1a, points1b, points1Params_b.a, points1Params_b.b, points1Params_b.c);
+    std::cout << "Error bound 1b: " << classifier2.GetErrorBound() << std::endl;
+
 }
