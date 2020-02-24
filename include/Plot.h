@@ -5,16 +5,16 @@
 #include "ClassifierBase.h"
 #include "gnuplot.h"
 
-static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, float aFit, float bFit, float cFit, bool verbose);
-static void createDataFile(std::string plotFileName, std::vector<Data> data);
+static void plotCompare(std::string plotName, std::vector<Data> data, float aFit, float bFit, float cFit, bool verbose);
+static void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
 
-static void plotCompare(std::string plotName, std::vector<Data> class1, std::vector<Data> class2, float aFit, float bFit, float cFit, bool verbose=false)
+static void plotCompare(std::string plotName, std::vector<Data> data, float aFit, float bFit, float cFit, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
     std::string class2FileName = "plots/" + plotName + "_c2.dat";
 
-    createDataFile(class1FileName, class1);
-    createDataFile(class2FileName, class2);
+    createDataFile(class1FileName, data, 0);
+    createDataFile(class2FileName, data, 1);
 
     GnuplotPipe gp;
     std::string plotString;
@@ -22,7 +22,7 @@ static void plotCompare(std::string plotName, std::vector<Data> class1, std::vec
     plotString += "set xlabel 'X'\n";
     plotString += "set ylabel 'Y'\n";
     plotString += "plot '" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
-    plotString += "'" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'blue', ";
+    plotString += "'" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'red', ";
     plotString += std::to_string(aFit) + " * x**2 + " + std::to_string(bFit) + " * x + " + std::to_string(cFit) + " with lines";
 
     if(verbose)
@@ -33,18 +33,18 @@ static void plotCompare(std::string plotName, std::vector<Data> class1, std::vec
     gp.sendLine(plotString);
 }
 
-static void createDataFile(std::string plotFileName, std::vector<Data> data)
+static void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 {
     std::ofstream outFile(plotFileName);
-
     for(unsigned int i = 0; i < data.size(); i++)
     {
-        for(int j = 0; j < data[i].feature.size(); j++)
-        {
-            outFile << data[i].feature[j] << " ";
+        if(data[i].label == label){
+            for(int j = 0; j < data[i].feature.size(); j++)
+            {
+                outFile << data[i].feature[j] << " ";
+            }
+            outFile << std::endl;
         }
-        outFile << std::endl;
     }
-
     outFile.close();
 }

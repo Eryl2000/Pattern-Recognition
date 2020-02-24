@@ -19,9 +19,6 @@ public:
     //Returns the parameters for the decision boundary
     PlotParams GetPlotParams();
 
-    //Returns the maximum error of the classifier
-    //float GetErrorBound();
-
 protected:
     VectorXf W;
     VectorXf X0;

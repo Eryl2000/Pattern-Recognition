@@ -27,10 +27,3 @@ PlotParams ClassifierCase1::GetPlotParams(){
     ret.c = X0(1, 0) - ret.b * X0(0, 0);
     return ret;
 }
-
-//Returns the maximum error of the classifier
-/*
-float ClassifierCase1::GetErrorBound(){
-    return 0.0f; //TODO: implement this
-}
-*/

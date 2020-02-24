@@ -46,6 +46,10 @@ public:
         numberOfClasses = means.size();
     }
 
+    virtual ~ClassifierBase(){
+
+    }
+
     //Returns the number of missclassified data-points 
     std::vector<MisclassificationData> GetMisclassification(const std::vector<Data> &data){
         std::vector<MisclassificationData> errors(numberOfClasses, MisclassificationData());
@@ -66,7 +70,7 @@ public:
     virtual PlotParams GetPlotParams() = 0;
 
     //Returns the maximum error of the classifier
-    virtual float GetErrorBound()
+    float GetErrorBound()
     {
         float beta = 0.5f;
         float term1 = 0.5f * beta * (1 - beta) * ((means[0] - means[1]).transpose() * ((1 - beta) * covariances[0] + beta * covariances[1]).inverse() * (means[0] - means[1]))(0, 0);
