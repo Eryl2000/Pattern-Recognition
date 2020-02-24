@@ -24,6 +24,6 @@ PlotParams ClassifierCase1::GetPlotParams(){
     PlotParams ret;
     ret.linear = true;
     ret.m = -W(0, 0) / W(1, 0);
-    ret.b = X0(1, 0) - ret.b * X0(0, 0);
+    ret.b = X0(1, 0) - ret.m * X0(0, 0);
     return ret;
 }

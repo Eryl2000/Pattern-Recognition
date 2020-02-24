@@ -5,10 +5,10 @@
 #include "ClassifierBase.h"
 #include "gnuplot.h"
 
-static void plotCompare(std::string plotName, std::vector<Data> data, float aFit, float bFit, float cFit, bool verbose);
+static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
 static void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
 
-static void plotCompare(std::string plotName, std::vector<Data> data, float aFit, float bFit, float cFit, bool verbose=false)
+static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
     std::string class2FileName = "plots/" + plotName + "_c2.dat";
@@ -19,11 +19,19 @@ static void plotCompare(std::string plotName, std::vector<Data> data, float aFit
     GnuplotPipe gp;
     std::string plotString;
     plotString += "set title '" + plotName + "' font ',20'\n";
-    plotString += "set xlabel 'X'\n";
-    plotString += "set ylabel 'Y'\n";
+    plotString += "set xlabel 'Feature 1'\n";
+    plotString += "set ylabel 'Feature 2'\n";
     plotString += "plot '" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'red', ";
     plotString += "'" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
-    plotString += std::to_string(aFit) + " * x**2 + " + std::to_string(bFit) + " * x + " + std::to_string(cFit) + " with lines";
+
+    if(params.linear)
+    {
+        plotString += std::to_string(params.m) + " * x + " + std::to_string(params.b) + " with lines lw 3 lc rgb 'orange'";
+    } else //quadratic
+    {
+        plotString += std::to_string(params.p1) + " + sqrt(" + std::to_string(params.p2) + " * x**2 + " + std::to_string(params.p3) + " * x + " + std::to_string(params.p4) + ") with lines lw 3 lc rgb 'orange', ";
+        plotString += std::to_string(params.p1) + " - sqrt(" + std::to_string(params.p2) + " * x**2 + " + std::to_string(params.p3) + " * x + " + std::to_string(params.p4) + ") with lines lw 3 lc rgb 'orange'";
+    }
 
     if(verbose)
     {

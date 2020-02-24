@@ -96,7 +96,7 @@ int main()
     std::cout << "\nProblem 2a" << std::endl;
     EvaluateData("Problem 2a", points2, classifier3);
     std::cout << "\nProblem 2b" << std::endl;
-    EvaluateData("Problem 2ba", points2, classifier4);
+    EvaluateData("Problem 2b", points2, classifier4);
     std::cout << "\nProblem 3" << std::endl;
     EvaluateData("Problem 3", points2, classifier5);
 
@@ -120,5 +120,5 @@ void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBas
     }
     std::cout << "  Total model misclassifications: " << totalMisclassified << " - (" << 100.0f * totalMisclassified / data.size() << "%)" << std::endl;
     std::cout << "  Bhattacharyya error bound: " << 100.0f * classifier->GetErrorBound() << "%" << std::endl;
-    plotCompare(name, data, plotParams.a, plotParams.b, plotParams.c);
+    plotCompare(name, data, plotParams, false);
 }
