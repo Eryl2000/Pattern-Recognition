@@ -8,6 +8,7 @@
 static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
 static void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
 
+// Plots data points and fit line
 static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
@@ -42,6 +43,7 @@ static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams
     std::cout << "Class 0: black,  Class 1: red" << std::endl;
 }
 
+// Outputs data points to plot file so that it can be used by gnuplot
 static void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 {
     std::ofstream outFile(plotFileName);

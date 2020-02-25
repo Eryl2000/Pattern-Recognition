@@ -77,7 +77,7 @@ public:
     //Returns the maximum error of the classifier
     float GetErrorBound()
     {
-        float beta = 0.5f;
+        float beta = 0.5f; // Bhattacharyya bound
         float term1 = 0.5f * beta * (1 - beta) * ((means[0] - means[1]).transpose() * ((1 - beta) * covariances[0] + beta * covariances[1]).inverse() * (means[0] - means[1]))(0, 0);
         float term2 = 0.5f * logf(((1 - beta) * covariances[0] + beta * covariances[1]).determinant() / (powf(covariances[0].determinant(), 1 - beta) * powf(covariances[1].determinant(), beta)));
         float k = term1 + term2;
