@@ -20,12 +20,12 @@ public:
     PlotParams GetPlotParams();
 
 protected:
-    MatrixXf A0;
-    MatrixXf A1;
-    VectorXf B0;
-    VectorXf B1;
-    float C0;
-    float C1;
+    MatrixXf W0;
+    MatrixXf W1;
+    VectorXf w0;
+    VectorXf w1;
+    float w00;
+    float w10;
 };
 
 #endif
