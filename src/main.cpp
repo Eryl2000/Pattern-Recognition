@@ -65,8 +65,8 @@ int main()
     {
         for(int j = 0; j < 2; ++j){
             Data d(2);
-            float x = box_muller(mean1[j](0, 0), covariance1[j](0, 0));
-            float y = box_muller(mean1[j](1, 0), covariance1[j](1, 1));
+            float x = box_muller(mean1[j](0, 0), sqrt(covariance1[j](0, 0)));
+            float y = box_muller(mean1[j](1, 0), sqrt(covariance1[j](1, 1)));
             d.feature(0, 0) = x;
             d.feature(1, 0) = y;
             d.label = j;
@@ -75,8 +75,8 @@ int main()
 
         for(int j = 0; j < 2; ++j){
             Data d(2);
-            float x = box_muller(mean2[j](0, 0), covariance2[j](0, 0));
-            float y = box_muller(mean2[j](1, 0), covariance2[j](1, 1));
+            float x = box_muller(mean2[j](0, 0), sqrt(covariance2[j](0, 0)));
+            float y = box_muller(mean2[j](1, 0), sqrt(covariance2[j](1, 1)));
             d.feature(0, 0) = x;
             d.feature(1, 0) = y;
             d.label = j;
