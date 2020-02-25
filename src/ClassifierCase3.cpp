@@ -31,7 +31,7 @@ PlotParams ClassifierCase3::GetPlotParams(){
     float c = A0(0, 1) - A1(0, 1);
     if(c != 0)
     {
-        std::cerr << "COVARIANCES PER CLASS MUST BE EQUAL FOR THE CURRENT PLOTTING IMPLEMENTATION!" << std::endl;
+        std::cerr << "NON-DIAGONAL COVARIANCE ENTRIES PER CLASS MUST BE EQUAL FOR THE CURRENT PLOTTING IMPLEMENTATION!" << std::endl;
     }
 
     float a = A0(1, 1) - A1(1, 1);

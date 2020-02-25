@@ -21,8 +21,8 @@ static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams
     plotString += "set title '" + plotName + "' font ',20'\n";
     plotString += "set xlabel 'Feature 1'\n";
     plotString += "set ylabel 'Feature 2'\n";
-    plotString += "plot '" + class2FileName + "' with points pt 7 ps 0.1 lc rgb 'red', ";
-    plotString += "'" + class1FileName + "' with points pt 7 ps 0.1 lc rgb 'black', ";
+    plotString += "plot '" + class2FileName + "' with points pt 7 ps 0.01 lc rgb 'red', ";
+    plotString += "'" + class1FileName + "' with points pt 7 ps 0.01 lc rgb 'black', ";
 
     if(params.linear)
     {
