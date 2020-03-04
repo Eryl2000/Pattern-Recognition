@@ -7,7 +7,7 @@ TestingFlags = -Og -g
 ReleaseFlags = -O3
 Targets := $(wildcard ./src/*.cpp)
 Include = -I ./include/ -I ./libs/ -I ./libs/eigen-3.3.7/
-ProjectName = Project1.exe
+ProjectName = Project2.exe
 
 
 all: $(Targets)
