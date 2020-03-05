@@ -12,7 +12,7 @@ using namespace Eigen;
 
 using std::vector;
 
-VectorXf GetSampleMean(vector<Data> data)
+VectorXf GetSampleMean(const vector<Data> & data)
 {
     if(data.size() == 0)
     {
@@ -31,7 +31,7 @@ VectorXf GetSampleMean(vector<Data> data)
     return mean;
 }
 
-MatrixXf GetSampleCovariance(vector<Data> data)
+MatrixXf GetSampleCovariance(const vector<Data> & data)
 {
     VectorXf mean = GetSampleMean(data);
     //std::cout << "Mean:" << std::endl << mean << std::endl;
@@ -63,7 +63,7 @@ MatrixXf GetSampleCovariance(vector<Data> data)
     return covariance;
 }
 
-vector<Data> GetRandomSample(vector<Data> data, float sampleRatio)
+vector<Data> GetRandomSample(const vector<Data> & data, float sampleRatio)
 {
     int sampleSize = (int)(sampleRatio * data.size());
     vector<unsigned int> indices(data.size());

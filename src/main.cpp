@@ -16,6 +16,7 @@
 using namespace Eigen;
 
 void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier);
+void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<Data> &data1, const std::vector<Data> &data2);
 
 int main(int argc, char *argv[])
 {
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
                       0, 8;
 
     //Prior probabilities
+    /*
     std::vector<float> priorProb1;
     priorProb1.push_back(0.5f);
     priorProb1.push_back(0.5f);
@@ -66,43 +68,49 @@ int main(int argc, char *argv[])
     std::vector<float> priorProb2;
     priorProb2.push_back(0.2f);
     priorProb2.push_back(0.8f);
+    */
 
     long numberOfPoints = 200000;
-    std::vector<Data> points1;
-    points1.reserve(numberOfPoints);
-    std::vector<Data> points2;
-    points2.reserve(numberOfPoints);
+    std::vector<std::vector<Data>> points1(2);
+    points1[0].reserve(numberOfPoints);
+    points1[1].reserve(numberOfPoints);
+
+    std::vector<std::vector<Data>> points2(2);
+    points2[0].reserve(numberOfPoints);
+    points2[1].reserve(numberOfPoints);
+
     for(long int i = 0; i < numberOfPoints / 2; ++i)
     {
-        // Refactor to generate data sets seperately
-        for(int j = 0; j < 1; ++j){
+        for(int j = 0; j < 2; ++j){
             Data d(2);
             float x = box_muller(mean1[j](0, 0), sqrt(covariance1[j](0, 0)));
             float y = box_muller(mean1[j](1, 0), sqrt(covariance1[j](1, 1)));
             d.feature(0, 0) = x;
             d.feature(1, 0) = y;
             d.label = j;
-            points1.push_back(d);
+            points1[j].push_back(d);
         }
 
-        for(int j = 1; j < 2; ++j){
+        for(int j = 0; j < 2; ++j){
             Data d(2);
             float x = box_muller(mean2[j](0, 0), sqrt(covariance2[j](0, 0)));
             float y = box_muller(mean2[j](1, 0), sqrt(covariance2[j](1, 1)));
             d.feature(0, 0) = x;
             d.feature(1, 0) = y;
             d.label = j;
-            points2.push_back(d);
+            points2[j].push_back(d);
         }
     }
 
-    Vector2f mean = GetSampleMean(points2);
+
+
+    Vector2f mean = GetSampleMean(points2[1]);
     std::cout << mean << std::endl;
 
-    Matrix2f covariance = GetSampleCovariance(points2);
+    Matrix2f covariance = GetSampleCovariance(points2[1]);
     std::cout << covariance << std::endl;
 
-    std::vector<Data> sample = GetRandomSample(points2, 0.001);
+    std::vector<Data> sample = GetRandomSample(points2[1], 0.001);
     std::cout << std::endl << "Data size: " << sample.size() << std::endl;
 
     mean = GetSampleMean(sample);
@@ -111,11 +119,20 @@ int main(int argc, char *argv[])
     covariance = GetSampleCovariance(sample);
     std::cout << covariance << std::endl;
 
+    std::cout << "-----------------\n\n\n\n-----------------" << std::endl;
+
+    std::vector<float> sampleRatios({1, 0.1, 0.01, 0.001, 0.0001});
+    std::cout << "Problem 1" << std::endl;
+    ComputeSampleStatistics(sampleRatios, points1[0], points1[1]);
+    std::cout << "Problem 2" << std::endl;
+    ComputeSampleStatistics(sampleRatios, points2[0], points2[1]);
+
     return 0;
 }
 
 void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier){
-    PlotParams plotParams = classifier->GetPlotParams();
+    //PlotParams plotParams = classifier->GetPlotParams();
+    std::cout << name << std::endl;
     std::vector<MisclassificationData> misclassifications = classifier->GetMisclassification(data);
     int totalMisclassified = 0;
     for(unsigned int i = 0; i < misclassifications.size(); ++i){
@@ -125,6 +142,27 @@ void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBas
         std::cout << "      False negatives: " << misclassifications[i].falseNegatives << " - (" << 200.0f * misclassifications[i].falseNegatives / data.size() << "%)" << std::endl;
     }
     std::cout << "  Total model misclassifications: " << totalMisclassified << " - (" << 100.0f * totalMisclassified / data.size() << "%)" << std::endl;
-    std::cout << "  Bhattacharyya error bound: " << 100.0f * classifier->GetErrorBound() << "%" << std::endl;
-    plotCompare(name, data, plotParams, false);
+    std::cout << "  Bhattacharyya error bound: " << 100.0f * classifier->GetErrorBound() << "%" << std::endl << std::endl;
+    //plotCompare(name, data, plotParams, false);
+}
+
+void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<Data> &data1, const std::vector<Data> &data2)
+{
+    for(uint i = 0; i < sampleRatios.size(); i++)
+    {
+        std::vector<Data> sample1 = GetRandomSample(data1, sampleRatios[i]);
+        Vector2f mean1 = GetSampleMean(sample1);
+        Matrix2f covariance1 = GetSampleCovariance(sample1);
+
+        std::vector<Data> sample2 = GetRandomSample(data2, sampleRatios[i]);
+        Vector2f mean2 = GetSampleMean(sample2);
+        Matrix2f covariance2 = GetSampleCovariance(sample2);
+
+        ClassifierCase3 classifier({mean1, mean2}, {covariance1, covariance2}, {0.5f, 0.5f});
+
+        std::vector<Data> combinedData(data1);
+        combinedData.insert(combinedData.end(), data2.begin(), data2.end());
+
+        EvaluateData("Sample: " + std::to_string(sampleRatios[i] * 100) + "%", combinedData, &classifier);
+    }
 }
