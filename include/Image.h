@@ -42,6 +42,24 @@ public:
         ret.g = (float)g / (r + g + b);
         return ret;
     }
+
+    static std::vector<CrCb> ToCrCb(std::vector<RGB> rgb){
+        std::vector<CrCb> ret;
+        ret.resize(rgb.size());
+        for(unsigned int i = 0; i < rgb.size(); ++i){
+            ret[i] = rgb[i].ToCrCb();
+        }
+        return ret;
+    }
+
+    static std::vector<NormalRGB> ToNormalRGB(std::vector<RGB> rgb){
+        std::vector<NormalRGB> ret;
+        ret.resize(rgb.size());
+        for(unsigned int i = 0; i < rgb.size(); ++i){
+            ret[i] = rgb[i].ToNormalRGB();
+        }
+        return ret;
+    }
 };
 
 template <typename PixelType>
@@ -74,67 +92,58 @@ public:
         
         //Read header data
         char *nextChar;
-        rows = strtol(header, &nextChar, 0);
-        cols = atoi(nextChar);
+        Rows = strtol(header, &nextChar, 0);
+        Cols = atoi(nextChar);
         ifp.getline(header, bufferSize, '\n');
-        pixelValueRange = strtol(header, &nextChar, 0);
+        PixelValueRange = strtol(header, &nextChar, 0);
 
-        //Create pixels vector
-        pixels.resize(rows);
-        for(int i = 0; i < rows; ++i){
-            pixels[i].resize(cols);
+        //Create Pixels vector
+        Pixels.resize(Rows);
+        for(int i = 0; i < Rows; ++i){
+            Pixels[i].resize(Cols);
         }
 
-        //Transfer the data from the file to pixels array
+        //Transfer the data from the file to Pixels array
         setData(fileName, ifp);
     }
 
     Image(Image &other){
-        rows = other.rows;
-        cols = other.cols;
-        pixelValueRange = other.pixelValueRange;
-        pixels = other.pixels;
+        Rows = other.Rows;
+        Cols = other.Cols;
+        PixelValueRange = other.PixelValueRange;
+        Pixels = other.Pixels;
     }
 
     ~Image(){
 
     }
 
-    int GetRows() const{
-        return rows;
+    int GetPixelValueRange() const{
+        return PixelValueRange;
     }
 
-    int GetCols() const{
-        return cols;
+    PixelType GetPixels(int i, int j) const{
+        return Pixels[i][j];
     }
 
-    int GetpixelValueRange() const{
-        return pixelValueRange;
-    }
-
-    PixelType Getpixels(int i, int j) const{
-        return pixels[i][j];
-    }
-
-    void Setpixels(int i, int j, PixelType value){
-        pixels[i][j] = value;
+    void SetPixels(int i, int j, PixelType value){
+        Pixels[i][j] = value;
     }
 
     void WriteToFile(char *fileName);
 
-private:
-    int rows;
-    int cols;
-    int pixelValueRange;
-    std::vector<std::vector<PixelType>> pixels;
+    int Rows;
+    int Cols;
+    int PixelValueRange;
+    std::vector<std::vector<PixelType>> Pixels;
 
     void setData(char *fileName, std::ifstream &ifp);
 };
 
 template <>
 void Image<GreyScale>::setData(char *fileName, std::ifstream &ifp){
-    unsigned char *charImage = (unsigned char *) new unsigned char [rows * cols];
-    ifp.read(reinterpret_cast<char *>(charImage), (rows * cols) * sizeof(unsigned char));
+    unsigned char *charImage = (unsigned char *) new unsigned char [Rows * Cols];
+    ifp.read(reinterpret_cast<char *>(charImage), (Rows * Cols) * sizeof(unsigned char));
     if (ifp.fail()) {
         std::cout << "Image " << fileName << " has wrong size" << std::endl;
         exit(1);
@@ -142,10 +151,10 @@ void Image<GreyScale>::setData(char *fileName, std::ifstream &ifp){
     ifp.close();
 
     GreyScale val;
-    for(int i = 0; i < rows; ++i){
-        for(int j = 0; j < cols; ++j) {
-            val.value = (int)charImage[i * cols + j];
-            pixels[i][j] = val;
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j) {
+            val.value = (int)charImage[i * Cols + j];
+            Pixels[i][j] = val;
         }
     }
     delete[] charImage;
@@ -153,8 +162,8 @@ void Image<GreyScale>::setData(char *fileName, std::ifstream &ifp){
 
 template <>
 void Image<RGB>::setData(char *fileName, std::ifstream &ifp){
-    unsigned char *charImage = (unsigned char *) new unsigned char [3 * rows * cols];
-    ifp.read(reinterpret_cast<char *>(charImage), (3 * rows * cols) * sizeof(unsigned char));
+    unsigned char *charImage = (unsigned char *) new unsigned char [3 * Rows * Cols];
+    ifp.read(reinterpret_cast<char *>(charImage), (3 * Rows * Cols) * sizeof(unsigned char));
     if (ifp.fail()) {
         std::cout << "Image " << fileName << " has wrong size" << std::endl;
         exit(1);
@@ -162,12 +171,12 @@ void Image<RGB>::setData(char *fileName, std::ifstream &ifp){
     ifp.close();
 
     RGB val;
-    for(int i = 0; i < rows; ++i){
-        for(int j = 0; j < cols; ++j) {
-            val.r = (int)charImage[3 * (i * cols + j) + 0];
-            val.g = (int)charImage[3 * (i * cols + j) + 1];
-            val.b = (int)charImage[3 * (i * cols + j) + 2];
-            pixels[i][j] = val;
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j) {
+            val.r = (int)charImage[3 * (i * Cols + j) + 0];
+            val.g = (int)charImage[3 * (i * Cols + j) + 1];
+            val.b = (int)charImage[3 * (i * Cols + j) + 2];
+            Pixels[i][j] = val;
         }
     }
     delete[] charImage;
@@ -176,11 +185,11 @@ void Image<RGB>::setData(char *fileName, std::ifstream &ifp){
 template <>
 void Image<GreyScale>::WriteToFile(char *fileName){
     std::ofstream ofp;
-    unsigned char *charImage = (unsigned char *) new unsigned char[rows * cols];
+    unsigned char *charImage = (unsigned char *) new unsigned char[Rows * Cols];
 
-    for(int i = 0; i < rows; ++i){
-        for(int j = 0; j < cols; ++j) {
-            charImage[i * cols + j] = (unsigned char)pixels[i][j].value;
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j) {
+            charImage[i * Cols + j] = (unsigned char)Pixels[i][j].value;
         }
     }
     
@@ -191,10 +200,10 @@ void Image<GreyScale>::WriteToFile(char *fileName){
     }
 
     ofp << "P5" << std::endl;
-    ofp << rows << " " << cols << std::endl;
-    ofp << pixelValueRange << std::endl;
+    ofp << Rows << " " << Cols << std::endl;
+    ofp << PixelValueRange << std::endl;
 
-    ofp.write(reinterpret_cast<char *>(charImage), (rows * cols) * sizeof(unsigned char));
+    ofp.write(reinterpret_cast<char *>(charImage), (Rows * Cols) * sizeof(unsigned char));
     if(ofp.fail()) {
         std::cout << "Can't write image " << fileName << std::endl;
         exit(0);
@@ -207,13 +216,13 @@ void Image<GreyScale>::WriteToFile(char *fileName){
 template <>
 void Image<RGB>::WriteToFile(char *fileName){
     std::ofstream ofp;
-    unsigned char *charImage = (unsigned char *) new unsigned char[3 * rows * cols];
+    unsigned char *charImage = (unsigned char *) new unsigned char[3 * Rows * Cols];
 
-    for(int i = 0; i < rows; ++i){
-        for(int j = 0; j < cols; ++j) {
-            charImage[3 * (i * cols + j) + 0] = pixels[i][j].r;
-            charImage[3 * (i * cols + j) + 1] = pixels[i][j].g;
-            charImage[3 * (i * cols + j) + 2] = pixels[i][j].b;
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j) {
+            charImage[3 * (i * Cols + j) + 0] = Pixels[i][j].r;
+            charImage[3 * (i * Cols + j) + 1] = Pixels[i][j].g;
+            charImage[3 * (i * Cols + j) + 2] = Pixels[i][j].b;
         }
     }
     
@@ -224,10 +233,10 @@ void Image<RGB>::WriteToFile(char *fileName){
     }
 
     ofp << "P6" << std::endl;
-    ofp << rows << " " << cols << std::endl;
-    ofp << pixelValueRange << std::endl;
+    ofp << Rows << " " << Cols << std::endl;
+    ofp << PixelValueRange << std::endl;
 
-    ofp.write(reinterpret_cast<char *>(charImage), (3 * rows * cols) * sizeof(unsigned char));
+    ofp.write(reinterpret_cast<char *>(charImage), (3 * Rows * Cols) * sizeof(unsigned char));
     if(ofp.fail()) {
         std::cout << "Can't write image " << fileName << std::endl;
         exit(0);
