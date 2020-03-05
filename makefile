@@ -1,4 +1,11 @@
-#Makefile
+EXE = Project2.exe
+
+SRC_DIR = src
+OBJ_DIR = obj
+
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
 CompilerFlags = -std=gnu++11 -I. -static-libgcc -static-libstdc++
 Warnings = -Wall -Wextra -Wdouble-promotion -Wswitch-default \
  -Wshadow -Wno-reorder
@@ -7,14 +14,17 @@ TestingFlags = -Og -g
 ReleaseFlags = -O3
 Targets := $(wildcard ./src/*.cpp)
 Include = -I ./include/ -I ./libs/ -I ./libs/eigen-3.3.7/
-ProjectName = Project2.exe
 
+.PHONY: all clean
 
-all: $(Targets)
-	g++ $(CompilerFlags) $(Warnings) $(TestingFlags) $(Targets) $(Include) -o $(ProjectName)
+all: $(EXE)
 
-fast: $(Targets)
-	g++ $(CompilerFlags) $(Warnings) $(ReleaseFlags) $(Targets) $(Include) -o $(ProjectName)
+$(EXE): $(OBJ)
+	g++ $(CompilerFlags) $(Warnings) $(TestingFlags) $(Include) $^ -o $@
 
-clean: 
-	$(RM) $(ProjectName)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(OBJ_DIR)
+	g++ $(CompilerFlags) $(Warnings) $(TestingFlags) $(Include) -c $< -o $@
+
+clean:
+	$(RM) -rf $(OBJ_DIR) $(EXE)

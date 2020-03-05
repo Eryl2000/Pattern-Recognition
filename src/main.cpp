@@ -19,8 +19,14 @@ void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBas
 
 int main(int argc, char *argv[])
 {
-    Image<RGB> image1(argv[1]);
-    image1.WriteToFile(argv[2]);
+    if(argc >= 3)
+    {
+        Image<RGB> image1(argv[1]);
+        image1.WriteToFile(argv[2]);
+    } else
+    {
+        std::cout << "Please enter input and output file as cmdline args" << std::endl;
+    }
     
     //Data set 1
     std::vector<VectorXf> mean1;
@@ -79,7 +85,7 @@ int main(int argc, char *argv[])
             points1.push_back(d);
         }
 
-        for(int j = 0; j < 2; ++j){
+        for(int j = 1; j < 2; ++j){
             Data d(2);
             float x = box_muller(mean2[j](0, 0), sqrt(covariance2[j](0, 0)));
             float y = box_muller(mean2[j](1, 0), sqrt(covariance2[j](1, 1)));
@@ -90,8 +96,21 @@ int main(int argc, char *argv[])
         }
     }
 
-    Vector2f mean = GetSampleMean(points1);
-    std::cout << mean[0] << ", " << mean[1] << std::endl;
+    Vector2f mean = GetSampleMean(points2);
+    std::cout << mean << std::endl;
+
+    Matrix2f covariance = GetSampleCovariance(points2);
+    std::cout << covariance << std::endl;
+
+    std::vector<Data> sample = GetRandomSample(points2, 0.001);
+    std::cout << std::endl << "Data size: " << sample.size() << std::endl;
+
+    mean = GetSampleMean(sample);
+    std::cout << mean << std::endl;
+
+    covariance = GetSampleCovariance(sample);
+    std::cout << covariance << std::endl;
+
     return 0;
 }
 

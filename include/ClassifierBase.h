@@ -13,6 +13,10 @@ public:
     {
         feature.resize(featureSize);
     }
+    Data()
+    {
+        
+    }
     VectorXf feature;
     int label;
 };
