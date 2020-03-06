@@ -188,7 +188,7 @@ void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, 
     std::vector<NormalRGB> pixels_NormalRGB = RGB::ToNormalRGB(skinPixels);
 
     std::vector<Data> features_CrCb;
-    features_CrCb.reserve(pixels_CrCb.size());
+    features_CrCb.resize(pixels_CrCb.size());
     for(unsigned int i = 0; i < pixels_CrCb.size(); ++i){
         features_CrCb[i] = Data(2);
         features_CrCb[i].feature(0, 0) = pixels_CrCb[i].Cr;
@@ -197,7 +197,7 @@ void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, 
     }
 
     std::vector<Data> features_NormalRGB;
-    features_NormalRGB.reserve(pixels_NormalRGB.size());
+    features_NormalRGB.resize(pixels_NormalRGB.size());
     for(unsigned int i = 0; i < pixels_NormalRGB.size(); ++i){
         features_NormalRGB[i] = Data(2);
         features_NormalRGB[i].feature(0, 0) = pixels_NormalRGB[i].r;
