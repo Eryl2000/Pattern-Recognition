@@ -10,6 +10,10 @@ ClassifierCase3Thresholded::ClassifierCase3Thresholded(const std::vector<VectorX
 
 //Returns the index of the class the input belongs to
 int ClassifierCase3Thresholded::Classify(const VectorXf &input) const{
+    if(priorProb.size() == 0){
+        std::cerr << "No threshold set" << std::endl;
+        exit(0);
+    }
     if(GetDiscriminantValue(input) >= priorProb[0]){
         return 1;
     } else{

@@ -18,6 +18,7 @@ using namespace Eigen;
 
 void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier);
 void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<Data> &data1, const std::vector<Data> &data2);
+void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2);
 
 int main(int argc, char *argv[])
 {
@@ -131,6 +132,14 @@ int main(int argc, char *argv[])
     std::cout << "Problem 2" << std::endl;
     ComputeSampleStatistics(sampleRatios, points2[0], points2[1]);
 
+
+    Vector2f mean_CrCb;
+    Matrix2f covariance_CrCb;
+    Vector2f mean_NormalRGB;
+    Matrix2f covariance_NormalRGB;
+
+    TrainImageClassifier(argv[1], argv[2], mean_CrCb, covariance_CrCb, mean_NormalRGB, covariance_NormalRGB);
+
     return 0;
 }
 
@@ -169,4 +178,35 @@ void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<
 
         EvaluateData("Sample: " + std::to_string(sampleRatios[i] * 100) + "%", combinedData, &classifier);
     }
+}
+
+void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2){
+    Image<RGB> inputImage(imageName);
+    Image<RGB> maskImage(maskFileName);
+    std::vector<RGB> skinPixels = inputImage.ExtractSkinPixels(maskImage);
+    std::vector<CrCb> pixels_CrCb = RGB::ToCrCb(skinPixels);
+    std::vector<NormalRGB> pixels_NormalRGB = RGB::ToNormalRGB(skinPixels);
+
+    std::vector<Data> features_CrCb;
+    features_CrCb.reserve(pixels_CrCb.size());
+    for(unsigned int i = 0; i < pixels_CrCb.size(); ++i){
+        features_CrCb[i] = Data(2);
+        features_CrCb[i].feature(0, 0) = pixels_CrCb[i].Cr;
+        features_CrCb[i].feature(1, 0) = pixels_CrCb[i].Cb;
+        features_CrCb[i].label = 1;
+    }
+
+    std::vector<Data> features_NormalRGB;
+    features_NormalRGB.reserve(pixels_NormalRGB.size());
+    for(unsigned int i = 0; i < pixels_NormalRGB.size(); ++i){
+        features_NormalRGB[i] = Data(2);
+        features_NormalRGB[i].feature(0, 0) = pixels_NormalRGB[i].r;
+        features_NormalRGB[i].feature(1, 0) = pixels_NormalRGB[i].g;
+        features_NormalRGB[i].label = 1;
+    }
+
+    mean1 = GetSampleMean(features_CrCb);
+    covariance1 = GetSampleCovariance(features_CrCb);
+    mean2 = GetSampleMean(features_NormalRGB);
+    covariance2 = GetSampleCovariance(features_NormalRGB);
 }
