@@ -12,6 +12,7 @@
 #include "Plot.h"
 #include "Image.h"
 #include "MLEstimation.h"
+#include "ROC.h"
 
 using namespace Eigen;
 

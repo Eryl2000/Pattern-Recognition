@@ -1,3 +1,6 @@
+#ifndef BOX_MULLER_H_
+#define BOX_MULLER_H_
+
 /* boxmuller.c           Implements the Polar form of the Box-Muller
                          Transformation
 
@@ -43,3 +46,4 @@ static float box_muller(float m, float s)    /* normal random variate generator 
 }
 
 
+#endif

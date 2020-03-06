@@ -1,3 +1,6 @@
+#ifndef ML_ESTIMATION_H_
+#define ML_ESTIMATION_H_
+
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
@@ -81,3 +84,5 @@ vector<Data> GetRandomSample(const vector<Data> & data, float sampleRatio)
 
     return sample;
 }
+
+#endif

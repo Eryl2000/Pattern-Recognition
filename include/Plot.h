@@ -1,15 +1,20 @@
+#ifndef PLOT_H_
+#define PLOT_H_
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include "ClassifierBase.h"
 #include "gnuplot.h"
+#include "ROC.h"
 
-static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
-static void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
+void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
+void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
+void createROCDataFile(std::string plotFileName, const std::vector<ROCValue> & rocValues);
 
 // Plots data points and fit line
-static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
+void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
     std::string class2FileName = "plots/" + plotName + "_c2.dat";
@@ -44,7 +49,7 @@ static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams
 }
 
 // Outputs data points to plot file so that it can be used by gnuplot
-static void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
+void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 {
     std::ofstream outFile(plotFileName);
     for(unsigned int i = 0; i < data.size(); i++)
@@ -59,3 +64,16 @@ static void createDataFile(std::string plotFileName, std::vector<Data> data, int
     }
     outFile.close();
 }
+
+// Outputs ROC points to plot file so that it can be used by gnuplot
+void createROCDataFile(std::string plotFileName, const std::vector<ROCValue> & rocValues)
+{
+    std::ofstream outFile(plotFileName);
+    for(unsigned int i = 0; i < rocValues.size(); i++)
+    {
+        outFile << rocValues[i].falsePositives << " " << rocValues[i].falseNegatives << std::endl;
+    }
+    outFile.close();
+}
+
+#endif
