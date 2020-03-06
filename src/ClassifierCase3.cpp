@@ -5,7 +5,7 @@
 ClassifierCase3::ClassifierCase3(const std::vector<VectorXf> &_means,
       const std::vector<MatrixXf> &_covariances,
       const std::vector<float> &_priorProb)
-    : ClassifierBase(_means, _covariances, _priorProb){
+    : ClassifierCase3Thresholded(_means, _covariances, _priorProb){
 
     W0 = -0.5f * covariances[0].inverse();
     W1 = -0.5f * covariances[1].inverse();
