@@ -118,24 +118,14 @@ public:
 
     }
 
-    int GetPixelValueRange() const{
-        return PixelValueRange;
-    }
-
-    PixelType GetPixels(int i, int j) const{
-        return Pixels[i][j];
-    }
-
-    void SetPixels(int i, int j, PixelType value){
-        Pixels[i][j] = value;
-    }
-
     void WriteToFile(char *fileName);
 
     int Rows;
     int Cols;
     int PixelValueRange;
     std::vector<std::vector<PixelType>> Pixels;
+
+private:
 
     void setData(char *fileName, std::ifstream &ifp);
 };
