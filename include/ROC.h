@@ -3,10 +3,7 @@
 
 #include <vector>
 #include <stdexcept>
-#include <cassert>
 #include <algorithm>
-
-#define assertm(exp, msg) assert(((void)msg, exp))
 
 #include "ClassifierBase.h"
 #include "ClassifierCase3Thresholded.h"
@@ -19,10 +16,12 @@ class ThresholdRange;
 
 void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues);
 
-ThresholdRange GetThresholdRange(const vector<Data> & data, const ClassifierCase3Thresholded & classifier, int numThresholds);
-vector<MisclassificationData> GetROCValues(ThresholdRange tRange, const vector<Data> & data, const ClassifierCase3Thresholded & classifier);
-float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData> & rocValues);
+vector<float> GetDiscriminants(const vector<Data> & data, const ClassifierCase3Thresholded & classifier);
+ThresholdRange GetThresholdRange(vector<float> discriminants, int numThresholds);
+vector<MisclassificationData> GetROCValues(ThresholdRange tRange, vector<float> discriminants, vector<Data> data);
+float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData> & rocValues, float fpToFnRatio);
 void PlotROC(std::string name, const vector<vector<MisclassificationData>> & rocValues, vector<std::string> classifierNames, bool verbose);
+std::vector<int> ClassfyPixels(float thresh, vector<float> discriminants);
 
 
 class ThresholdRange
@@ -45,27 +44,32 @@ class ThresholdRange
         float step;
 };
 
-/*
-Input: vector of data points, classifer
-Returns min, max, step
-*/
-ThresholdRange GetThresholdRange(const vector<Data> & data, const ClassifierCase3Thresholded & classifier, int numThresholds)
+vector<float> GetDiscriminants(const vector<Data> & data, const ClassifierCase3Thresholded & classifier)
 {
-    if(data.size() == 0)
-    {
-        throw std::invalid_argument("GetThresholdRange cannot compute on empty data!");
-    }
-
     vector<float> discriminants(data.size());
     for(unsigned int i = 0; i < data.size(); i++)
     {
         discriminants[i] = classifier.GetDiscriminantValue(data[i].feature);
     }
 
+    return discriminants;
+}
+
+/*
+Input: vector of data points, classifer
+Returns min, max, step
+*/
+ThresholdRange GetThresholdRange(vector<float> discriminants, int numThresholds)
+{
+    if(discriminants.size() == 0)
+    {
+        throw std::invalid_argument("GetThresholdRange cannot compute on empty data!");
+    }
+
     ThresholdRange ret;
     ret.min = *std::min_element(discriminants.begin(), discriminants.end());
     ret.max = *std::max_element(discriminants.begin(), discriminants.end());
-    ret.step = (ret.min + ret.max) / numThresholds;
+    ret.step = (ret.max - ret.min) / numThresholds;
 
     return ret;
 }
@@ -74,15 +78,34 @@ ThresholdRange GetThresholdRange(const vector<Data> & data, const ClassifierCase
 Input: min, max, step, vector of data points
 Generate ROC values (False Positive/False Negative) for each threshold value
 */
-vector<MisclassificationData> GetROCValues(ThresholdRange tRange, const vector<Data> & data, ClassifierCase3Thresholded & classifier)
+vector<MisclassificationData> GetROCValues(ThresholdRange tRange, vector<float> discriminants, vector<Data> data)
 {
+    if(discriminants.size() != data.size())
+    {
+        throw std::invalid_argument("GetROCValues discriminants and data must be the same length!");
+    }
+
     vector<MisclassificationData> ret;
+    std::cout << "Min: " << tRange.min << ", Max: " << tRange.max << ", Step: " << tRange.step << std::endl;
     ret.reserve(int((tRange.max - tRange.min) / tRange.step));
     // Should generate for [tRange.min, tRange.max] with step tRange.step
     for(float thresh = tRange.min; thresh <= tRange.max; thresh += tRange.step)
     {
-        classifier.SetThreshold(thresh);
-        ret.push_back(classifier.GetMisclassification(data)[0]);
+        //std::cout << "Thresh: " << std::to_string(thresh) << std::endl;
+        MisclassificationData currentMisclass;
+        for(unsigned int i = 0; i < discriminants.size(); i++)
+        {
+            bool skin = discriminants[i] >= thresh;
+            if(skin && data[i].label == 0)
+            {
+                currentMisclass.falsePositives++;
+            } else if(!skin && data[i].label == 1)
+            {
+                currentMisclass.falseNegatives++;
+            }
+        }
+        
+        ret.push_back(currentMisclass);
     }
 
     return ret;
@@ -92,7 +115,7 @@ vector<MisclassificationData> GetROCValues(ThresholdRange tRange, const vector<D
 Input, min, max, step, vector of ROC values
 Returns threshold with smallest magnitude
 */
-float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData> & rocValues)
+float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData> & rocValues, float fpToFnRatio = 0.5f)
 {
     if(rocValues.size() == 0)
     {
@@ -101,21 +124,25 @@ float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData
 
     float currentThreshold = tRange.min;
     float bestThreshold = currentThreshold;
-    float bestEqualError = abs(rocValues[0].falseNegatives - rocValues[0].falsePositives);
+    float bestEqualError = abs((1 - fpToFnRatio) * rocValues[0].falseNegatives - fpToFnRatio * rocValues[0].falsePositives);
+    int rocIndex = 0;
 
     currentThreshold += tRange.step;
     for(unsigned int i = 1; i < rocValues.size(); i++)
     {
-        float errorDiff = abs(rocValues[0].falseNegatives - rocValues[0].falsePositives);
+        float errorDiff = abs((1 - fpToFnRatio) * rocValues[i].falseNegatives - fpToFnRatio * rocValues[i].falsePositives);
         if(errorDiff < bestEqualError)
         {
             bestEqualError = errorDiff;
             bestThreshold = currentThreshold;
+            rocIndex = i;
         }
         currentThreshold += tRange.step;
     }
 
-    assertm(currentThreshold == tRange.max, "GetBestThreshold should end at tRange.max");
+    std::cout << "Best threshold: " << std::endl;
+    std::cout << "FN: " << rocValues[rocIndex].falseNegatives << ", FP: " << rocValues[rocIndex].falsePositives << std::endl;
+    std::cout << "Equal error: " << bestEqualError << std::endl;
 
     return bestThreshold;
 }
@@ -144,9 +171,10 @@ void PlotROC(std::string name, const vector<vector<MisclassificationData>> & roc
     plotString += "set xlabel 'False Positives'\n";
     plotString += "set ylabel 'False Negatives'\n";
 
+    plotString += "plot ";
     for(unsigned int i = 0; i < rocValues.size(); i++)
     {
-        plotString += "plot '" + fileNames[i] + "' with lines lw 3 lc rgb 'red', ";
+        plotString += "'" + fileNames[i] + "' with lines lw 3 lc rgb 'red', ";
     }
 
     if(verbose)
@@ -154,6 +182,17 @@ void PlotROC(std::string name, const vector<vector<MisclassificationData>> & roc
         std::cout << plotString << std::endl;
     }
     gp.sendLine(plotString);
+}
+
+std::vector<int> ClassfyPixels(float thresh, vector<float> discriminants)
+{
+    std::vector<int> ret(discriminants.size());
+    for(unsigned int i = 0; i < discriminants.size(); i++)
+    {
+        ret[i] = discriminants[i] >= thresh ? 1 : 0;
+    }
+
+    return ret;
 }
 
 #endif

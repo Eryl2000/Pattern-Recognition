@@ -10,12 +10,64 @@ class CrCb{
 public:
     float Cr;
     float Cb;
+
+    static std::vector<Data> ToDataVector(std::vector<CrCb> pixels_CrCb, std::vector<int> flattenedMask, int singleClass = -1)
+    {
+        if(singleClass == -1 && pixels_CrCb.size() != flattenedMask.size())
+        {
+            throw std::invalid_argument("ToDataVector must either take a single class value or the pixels and mask vectors must be the same length");
+        }
+
+        std::vector<Data> features_CrCb;
+        features_CrCb.resize(pixels_CrCb.size());
+        for(unsigned int i = 0; i < pixels_CrCb.size(); ++i){
+            features_CrCb[i] = Data(2);
+            features_CrCb[i].feature(0, 0) = pixels_CrCb[i].Cr;
+            features_CrCb[i].feature(1, 0) = pixels_CrCb[i].Cb;
+
+            if(singleClass == -1)
+            {
+                features_CrCb[i].label = flattenedMask[i];
+            } else
+            {
+                features_CrCb[i].label = singleClass;
+            }
+        }
+
+        return features_CrCb;
+    }
 };
 
 class NormalRGB{
 public:
     float r;
     float g;
+
+    static std::vector<Data> ToDataVector(std::vector<NormalRGB> pixels_NormalRGB, std::vector<int> flattenedMask, int singleClass = -1)
+    {
+        if(singleClass == -1 && pixels_NormalRGB.size() != flattenedMask.size())
+        {
+            throw std::invalid_argument("ToDataVector must either take a single class value or the pixels and mask vectors must be the same length");
+        }
+
+        std::vector<Data> features_NormalRGB;
+        features_NormalRGB.resize(pixels_NormalRGB.size());
+        for(unsigned int i = 0; i < pixels_NormalRGB.size(); ++i){
+            features_NormalRGB[i] = Data(2);
+            features_NormalRGB[i].feature(0, 0) = pixels_NormalRGB[i].r;
+            features_NormalRGB[i].feature(1, 0) = pixels_NormalRGB[i].g;
+
+            if(singleClass == -1)
+            {
+                features_NormalRGB[i].label = flattenedMask[i];
+            } else
+            {
+                features_NormalRGB[i].label = singleClass;
+            }
+        }
+
+        return features_NormalRGB;
+    }
 };
 
 class GreyScale{
@@ -37,12 +89,19 @@ public:
         b = _b;
     }
 
-    bool operator==(const RGB& other){
+    bool operator==(const RGB& other) const{
         return (r == other.r) && (g == other.g) && (b == other.b);
     }
 
-    bool operator!=(const RGB& other){
+    bool operator!=(const RGB& other) const{
         return !(*this == other);
+    }
+
+    void operator=(const RGB& other)
+    {
+        r = other.r;
+        g = other.g;
+        b = other.b;
     }
 
     CrCb ToCrCb() const{
@@ -94,11 +153,14 @@ template <typename PixelType>
 class Image {
 public:
     Image(char *fileName);
-    Image(Image &other);
+    Image(const Image &other);
     ~Image();
 
     void WriteToFile(char *fileName);
     std::vector<RGB> ExtractSkinPixels(Image<RGB> mask) const;
+    std::vector<PixelType> FlattenedPixels() const;
+    std::vector<int> GetFlattenedMask() const;
+    Image<PixelType> GetClassifiedImage(std::vector<int> flattenedSkinClassification);
 
     int Rows;
     int Cols;

@@ -16,6 +16,7 @@ public:
     virtual int Classify(const VectorXf &input) const;
     float GetDiscriminantValue(const VectorXf &input) const;
     void SetThreshold(float threshold);
+    virtual PlotParams GetPlotParams();
 };
 
 #endif

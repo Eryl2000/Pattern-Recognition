@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <stdexcept>
 #include "ClassifierCase3Thresholded.h"
 
 ClassifierCase3Thresholded::ClassifierCase3Thresholded(const std::vector<VectorXf> &_means,
@@ -9,6 +10,7 @@ ClassifierCase3Thresholded::ClassifierCase3Thresholded(const std::vector<VectorX
 }
 
 //Returns the index of the class the input belongs to
+// 1 if skin, 0 if non-skin
 int ClassifierCase3Thresholded::Classify(const VectorXf &input) const{
     if(priorProb.size() == 0){
         std::cerr << "No threshold set" << std::endl;
@@ -29,4 +31,9 @@ float ClassifierCase3Thresholded::GetDiscriminantValue(const VectorXf &input) co
 
 void ClassifierCase3Thresholded::SetThreshold(float threshold){
     priorProb.push_back(threshold);
+}
+
+PlotParams ClassifierCase3Thresholded::GetPlotParams()
+{
+    throw std::logic_error("ClassifierCase3Thresholded does not have an implementation for GetPlotParams");
 }

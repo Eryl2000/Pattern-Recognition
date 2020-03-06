@@ -18,7 +18,15 @@ using namespace Eigen;
 
 void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBase *classifier);
 void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<Data> &data1, const std::vector<Data> &data2);
-void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2);
+void TrainImageClassifier(std::string imageName, std::string maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2);
+void CreateImageOutputs(std::string title,
+                        std::string imageName,
+                        std::string maskName,
+                        std::string outputName_NormalRGB,
+                        std::string outputName_CrCb,
+                        std::string outputName_Masked,
+                        ClassifierCase3Thresholded & classifier_NormalRGB,
+                        ClassifierCase3Thresholded & classifier_CrCb);
 
 int main(int argc, char *argv[])
 {
@@ -138,8 +146,36 @@ int main(int argc, char *argv[])
     Vector2f mean_NormalRGB;
     Matrix2f covariance_NormalRGB;
 
-    TrainImageClassifier(argv[1], argv[2], mean_CrCb, covariance_CrCb, mean_NormalRGB, covariance_NormalRGB);
+    TrainImageClassifier("./Data_Prog2/Training_1.ppm", "./Data_Prog2/ref1.ppm", mean_CrCb, covariance_CrCb, mean_NormalRGB, covariance_NormalRGB);
+    ClassifierCase3Thresholded classifier_NormalRGB({mean_NormalRGB}, {covariance_NormalRGB}, {0});
+    ClassifierCase3Thresholded classifier_CrCb({mean_CrCb}, {covariance_CrCb}, {0});
 
+    CreateImageOutputs("Training1",
+                       "./Data_Prog2/Training_1.ppm",
+                       "./Data_Prog2/ref1.ppm",
+                       "./Data_Prog2/output1_NRGB.ppm",
+                       "./Data_Prog2/output1_CrCb.ppm",
+                       "./Data_Prog2/_output1_Masked.ppm",
+                       classifier_NormalRGB,
+                       classifier_CrCb);
+
+    CreateImageOutputs("Training3",
+                       "./Data_Prog2/Training_3.ppm",
+                       "./Data_Prog2/ref3.ppm",
+                       "./Data_Prog2/output3_NRGB.ppm",
+                       "./Data_Prog2/output3_CrCb.ppm",
+                       "./Data_Prog2/_output3_Masked.ppm",
+                       classifier_NormalRGB,
+                       classifier_CrCb);
+
+    CreateImageOutputs("Training6",
+                       "./Data_Prog2/Training_6.ppm",
+                       "./Data_Prog2/ref6.ppm",
+                       "./Data_Prog2/output6_NRGB.ppm",
+                       "./Data_Prog2/output6_CrCb.ppm",
+                       "./Data_Prog2/_output6_Masked.ppm",
+                       classifier_NormalRGB,
+                       classifier_CrCb);
     return 0;
 }
 
@@ -180,33 +216,73 @@ void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<
     }
 }
 
-void TrainImageClassifier(char *imageName, char *maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2){
-    Image<RGB> inputImage(imageName);
-    Image<RGB> maskImage(maskFileName);
+void TrainImageClassifier(std::string imageName, std::string maskFileName, Vector2f& mean1, Matrix2f& covariance1, Vector2f& mean2, Matrix2f& covariance2){
+    Image<RGB> inputImage((char*)imageName.c_str());
+    Image<RGB> maskImage((char*)maskFileName.c_str());
     std::vector<RGB> skinPixels = inputImage.ExtractSkinPixels(maskImage);
+
     std::vector<CrCb> pixels_CrCb = RGB::ToCrCb(skinPixels);
     std::vector<NormalRGB> pixels_NormalRGB = RGB::ToNormalRGB(skinPixels);
 
-    std::vector<Data> features_CrCb;
-    features_CrCb.resize(pixels_CrCb.size());
-    for(unsigned int i = 0; i < pixels_CrCb.size(); ++i){
-        features_CrCb[i] = Data(2);
-        features_CrCb[i].feature(0, 0) = pixels_CrCb[i].Cr;
-        features_CrCb[i].feature(1, 0) = pixels_CrCb[i].Cb;
-        features_CrCb[i].label = 1;
-    }
-
-    std::vector<Data> features_NormalRGB;
-    features_NormalRGB.resize(pixels_NormalRGB.size());
-    for(unsigned int i = 0; i < pixels_NormalRGB.size(); ++i){
-        features_NormalRGB[i] = Data(2);
-        features_NormalRGB[i].feature(0, 0) = pixels_NormalRGB[i].r;
-        features_NormalRGB[i].feature(1, 0) = pixels_NormalRGB[i].g;
-        features_NormalRGB[i].label = 1;
-    }
+    std::vector<Data> features_CrCb = CrCb::ToDataVector(pixels_CrCb, {}, 1);
+    std::vector<Data> features_NormalRGB = NormalRGB::ToDataVector(pixels_NormalRGB, {}, 1);
 
     mean1 = GetSampleMean(features_CrCb);
     covariance1 = GetSampleCovariance(features_CrCb);
     mean2 = GetSampleMean(features_NormalRGB);
     covariance2 = GetSampleCovariance(features_NormalRGB);
+}
+
+// Output ROC curves and classified images
+// Input: training image name, mask name, output image name, classifier
+void CreateImageOutputs(std::string title,
+                        std::string imageName,
+                        std::string maskName,
+                        std::string outputName_NormalRGB,
+                        std::string outputName_CrCb,
+                        std::string outputName_Masked,
+                        ClassifierCase3Thresholded & classifier_NormalRGB,
+                        ClassifierCase3Thresholded & classifier_CrCb)
+{
+    // Import image
+    Image<RGB> image((char*)(imageName).c_str());
+    Image<RGB> mask((char*)maskName.c_str());
+
+    // Create NRGB and CrCb vectors
+    std::vector<int> classMask = mask.GetFlattenedMask();
+    std::vector<Data> features_NormalRGB = NormalRGB::ToDataVector(RGB::ToNormalRGB(image.FlattenedPixels()), classMask);
+    std::vector<Data> features_CrCb = CrCb::ToDataVector(RGB::ToCrCb(image.FlattenedPixels()), classMask);
+
+    // Get ROC values for both data sets using classifier
+    std::cout << "Calculating discriminants..." << std::endl;
+    vector<float> discriminants_NormalRGB = GetDiscriminants(features_NormalRGB, classifier_NormalRGB);
+    vector<float> discriminants_CrCb = GetDiscriminants(features_CrCb, classifier_CrCb);
+
+    const int numThresholds = 100;
+    ThresholdRange threshold_NormalRGB = GetThresholdRange(discriminants_NormalRGB, numThresholds);
+    ThresholdRange threshold_CrCb = GetThresholdRange(discriminants_CrCb, numThresholds);
+
+    std::vector<MisclassificationData> roc_NormalRGB = GetROCValues(threshold_NormalRGB, discriminants_NormalRGB, features_NormalRGB);
+    std::vector<MisclassificationData> roc_CrCb = GetROCValues(threshold_CrCb, discriminants_CrCb, features_CrCb);
+
+    // Get BestThreshold for both data sets
+    const float FNtoFPRatio = 0.30;
+    float bestThresh_NormalRGB = GetBestThreshold(threshold_NormalRGB, roc_NormalRGB, FNtoFPRatio);
+    float bestThresh_CrCb = GetBestThreshold(threshold_CrCb, roc_CrCb, FNtoFPRatio);
+
+    // Plot ROC curves for both data sets
+    PlotROC(title, {roc_NormalRGB, roc_CrCb}, {"Normal_RGB", "YCrCb"});
+
+    // Get classified pixels using best threshold
+    std::vector<int> classified_NormalRGB = ClassfyPixels(bestThresh_NormalRGB, discriminants_NormalRGB);
+    std::vector<int> classified_CrCb = ClassfyPixels(bestThresh_CrCb, discriminants_CrCb);
+
+    // Generate ouput image
+    Image<RGB> output_NormalRGB = image.GetClassifiedImage(classified_NormalRGB);
+    Image<RGB> output_CrCb = image.GetClassifiedImage(classified_CrCb);
+    Image<RGB> output_Masked = image.GetClassifiedImage(classMask);
+
+    output_NormalRGB.WriteToFile((char*)outputName_NormalRGB.c_str());
+    output_CrCb.WriteToFile((char*)outputName_CrCb.c_str());
+    output_Masked.WriteToFile((char*)outputName_Masked.c_str());
 }

@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 template <typename PixelType>
 Image<PixelType>::Image(char *fileName){
     unsigned int bufferSize = 100;
@@ -42,7 +44,7 @@ Image<PixelType>::Image(char *fileName){
 }
 
 template <typename PixelType>
-Image<PixelType>::Image(Image &other){
+Image<PixelType>::Image(const Image &other){
     Rows = other.Rows;
     Cols = other.Cols;
     PixelValueRange = other.PixelValueRange;
@@ -59,10 +61,72 @@ std::vector<RGB> Image<PixelType>::ExtractSkinPixels(Image<RGB> mask) const{
     std::vector<RGB> ret;
     for(int i = 0; i < mask.Rows; ++i){
         for(int j = 0; j < mask.Cols; ++j)
-        if(mask.Pixels[i][j] != RGB::Black()){
-            ret.push_back(Pixels[i][j]);
+        {
+            if(mask.Pixels[i][j] != RGB::Black()){
+                ret.push_back(Pixels[i][j]);
+            }
         }
     }
+    return ret;
+}
+
+template <typename PixelType>
+std::vector<PixelType> Image<PixelType>::FlattenedPixels() const
+{
+    std::vector<PixelType> ret;
+    for(unsigned int i = 0; i < Pixels.size(); i++)
+    {
+        ret.insert(ret.end(), Pixels[i].begin(), Pixels[i].end());
+    }
+
+    return ret;
+}
+
+template <typename PixelType>
+std::vector<int> Image<PixelType>::GetFlattenedMask() const
+{
+    std::vector<int> ret;
+    ret.reserve(Rows*Cols);
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j)
+        {
+            if(Pixels[i][j] != RGB::Black()){
+                ret.push_back(1);
+            } else
+            {
+                ret.push_back(0);
+            }
+        }
+        
+    }
+    return ret;
+}
+
+template <typename PixelType>
+Image<PixelType> Image<PixelType>::GetClassifiedImage(std::vector<int> flattenedSkinClassification)
+{
+    if(flattenedSkinClassification.size() != (unsigned int)(Rows * Cols))
+    {
+        throw std::invalid_argument("GetClassifiedImage flattenedSkinClassification must be Rows * Cols size");
+    }
+
+    int no_skinCount = 0;
+    Image<PixelType> ret(*this);
+    for(int i = 0; i < Rows; ++i){
+        for(int j = 0; j < Cols; ++j)
+        {
+            if(flattenedSkinClassification[i * Cols + j] == 0)
+            {
+                //std::cout << "Non-skin!" << std::endl;
+                ret.Pixels[i][j] = RGB::Black();
+                no_skinCount++;
+            }
+        }
+        
+    }
+
+    std::cout << "No skin: " << no_skinCount << std::endl;
+
     return ret;
 }
 
