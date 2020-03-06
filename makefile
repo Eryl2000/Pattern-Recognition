@@ -26,5 +26,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR)
 	g++ $(CompilerFlags) $(Warnings) $(TestingFlags) $(Include) -c $< -o $@
 
+reset: clean all
+
 clean:
 	$(RM) -rf $(OBJ_DIR) $(EXE)
