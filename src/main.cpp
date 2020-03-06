@@ -21,10 +21,13 @@ void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<
 
 int main(int argc, char *argv[])
 {
-    if(argc >= 3)
+    if(argc >= 4)
     {
         Image<RGB> image1(argv[1]);
         image1.WriteToFile(argv[2]);
+
+        Image<RGB> mask(argv[3]);
+        image1.ExtractSkinPixels(mask);
     } else
     {
         std::cout << "Please enter input and output file as cmdline args" << std::endl;
