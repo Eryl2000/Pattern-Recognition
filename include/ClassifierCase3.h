@@ -10,7 +10,7 @@ public:
       const std::vector<float> &_priorProb);
     
     //Returns the index of the class the input belongs to
-    int Classify(const VectorXf &input);
+    int Classify(const VectorXf &input) const;
 
     //Returns the parameters for the decision boundary
     PlotParams GetPlotParams();

@@ -13,7 +13,7 @@ public:
       const std::vector<MatrixXf> &_covariances,
       const std::vector<float> &_priorProb);
     
-    virtual int Classify(const VectorXf &input);
+    virtual int Classify(const VectorXf &input) const;
     float GetDiscriminantValue(const VectorXf &input) const;
     void SetThreshold(float threshold);
 };

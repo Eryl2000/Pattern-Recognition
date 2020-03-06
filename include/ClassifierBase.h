@@ -60,7 +60,7 @@ public:
     }
 
     //Returns the number of missclassified data-points 
-    std::vector<MisclassificationData> GetMisclassification(const std::vector<Data> &data){
+    std::vector<MisclassificationData> GetMisclassification(const std::vector<Data> &data) const{
         std::vector<MisclassificationData> errors(numberOfClasses, MisclassificationData());
         for(auto dataPoint : data){
             int classification = Classify(dataPoint.feature);
@@ -73,7 +73,7 @@ public:
     }
 
     //Returns the index of the class the input belongs to
-    virtual int Classify(const VectorXf &input) = 0;
+    virtual int Classify(const VectorXf &input) const = 0;
 
     //Returns the parameters for the decision boundary
     virtual PlotParams GetPlotParams() = 0;

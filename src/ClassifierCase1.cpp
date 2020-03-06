@@ -11,7 +11,7 @@ ClassifierCase1::ClassifierCase1(const std::vector<VectorXf> &_means,
 }
 
 //Returns the index of the class the input belongs to
-int ClassifierCase1::Classify(const VectorXf &input){
+int ClassifierCase1::Classify(const VectorXf &input) const{
     if(W.dot(input - X0) >= 0.0f){
         return 0;
     } else{

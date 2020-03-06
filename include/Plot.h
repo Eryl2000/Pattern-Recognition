@@ -7,11 +7,10 @@
 #include <fstream>
 #include "ClassifierBase.h"
 #include "gnuplot.h"
-#include "ROC.h"
 
 void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
 void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
-void createROCDataFile(std::string plotFileName, const std::vector<ROCValue> & rocValues);
+void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues);
 
 // Plots data points and fit line
 void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
@@ -66,7 +65,7 @@ void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 }
 
 // Outputs ROC points to plot file so that it can be used by gnuplot
-void createROCDataFile(std::string plotFileName, const std::vector<ROCValue> & rocValues)
+void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues)
 {
     std::ofstream outFile(plotFileName);
     for(unsigned int i = 0; i < rocValues.size(); i++)

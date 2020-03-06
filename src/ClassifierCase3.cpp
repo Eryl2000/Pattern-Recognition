@@ -16,7 +16,7 @@ ClassifierCase3::ClassifierCase3(const std::vector<VectorXf> &_means,
 }
 
 //Returns the index of the class the input belongs to
-int ClassifierCase3::Classify(const VectorXf &input){
+int ClassifierCase3::Classify(const VectorXf &input) const{
     float G0 = input.dot(W0 * input) + input.dot(w0) + w00;
     float G1 = input.dot(W1 * input) + input.dot(w1) + w10;
     if(G0 >= G1){
