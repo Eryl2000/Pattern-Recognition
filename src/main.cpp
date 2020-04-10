@@ -197,7 +197,7 @@ void EvaluateData(std::string name, const std::vector<Data> &data, ClassifierBas
 
 void ComputeSampleStatistics(std::vector<float> sampleRatios, const std::vector<Data> &data1, const std::vector<Data> &data2)
 {
-    for(uint i = 0; i < sampleRatios.size(); i++)
+    for(unsigned int i = 0; i < sampleRatios.size(); i++)
     {
         std::vector<Data> sample1 = GetRandomSample(data1, sampleRatios[i]);
         Vector2f mean1 = GetSampleMean(sample1);
