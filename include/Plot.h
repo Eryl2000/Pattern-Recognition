@@ -8,12 +8,26 @@
 #include "ClassifierBase.h"
 #include "gnuplot.h"
 
-void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
-void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
-void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues);
+class PlotParams;
+
+static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose);
+static void createDataFile(std::string plotFileName, std::vector<Data> data, int label);
+static void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues);
+
+class PlotParams{
+public:
+    bool linear;
+    float m;
+    float b;
+    
+    float p1;
+    float p2;
+    float p3;
+    float p4;
+};
 
 // Plots data points and fit line
-void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
+static void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params, bool verbose=false)
 {
     std::string class1FileName = "plots/" + plotName + "_c1.dat";
     std::string class2FileName = "plots/" + plotName + "_c2.dat";
@@ -48,7 +62,7 @@ void plotCompare(std::string plotName, std::vector<Data> data, PlotParams params
 }
 
 // Outputs data points to plot file so that it can be used by gnuplot
-void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
+static void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 {
     std::ofstream outFile(plotFileName);
     for(unsigned int i = 0; i < data.size(); i++)
@@ -65,7 +79,7 @@ void createDataFile(std::string plotFileName, std::vector<Data> data, int label)
 }
 
 // Outputs ROC points to plot file so that it can be used by gnuplot
-void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues)
+static void createROCDataFile(std::string plotFileName, const std::vector<MisclassificationData> & rocValues)
 {
     std::ofstream outFile(plotFileName);
     for(unsigned int i = 0; i < rocValues.size(); i++)

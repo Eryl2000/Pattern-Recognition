@@ -23,7 +23,6 @@ float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData
 void PlotROC(std::string name, const vector<vector<MisclassificationData>> & rocValues, vector<std::string> classifierNames, bool verbose);
 std::vector<int> ClassfyPixels(float thresh, vector<float> discriminants);
 
-
 class ThresholdRange
 {
     public:

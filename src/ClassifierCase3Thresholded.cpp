@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <stdexcept>
 #include "ClassifierCase3Thresholded.h"
+#include "Plot.h"
 
 ClassifierCase3Thresholded::ClassifierCase3Thresholded(const std::vector<VectorXf> &_means,
       const std::vector<MatrixXf> &_covariances,

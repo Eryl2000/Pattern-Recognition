@@ -4,45 +4,11 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include "Data.h"
+
 using namespace Eigen;
 
-class Data
-{
-public:
-    Data(int featureSize)
-    {
-        feature.resize(featureSize);
-    }
-    Data()
-    {
-        
-    }
-    VectorXf feature;
-    int label;
-};
-
-class PlotParams{
-public:
-    bool linear;
-    float m;
-    float b;
-    
-    float p1;
-    float p2;
-    float p3;
-    float p4;
-};
-
-class MisclassificationData{
-public:
-    MisclassificationData(){
-        falsePositives = 0;
-        falseNegatives = 0;
-    }
-    int falsePositives;
-    int falseNegatives;
-};
-
+class PlotParams;
 
 class ClassifierBase{
 public:

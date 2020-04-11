@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 #include "ClassifierCase3.h"
-
+#include "Plot.h"
 
 ClassifierCase3::ClassifierCase3(const std::vector<VectorXf> &_means,
       const std::vector<MatrixXf> &_covariances,

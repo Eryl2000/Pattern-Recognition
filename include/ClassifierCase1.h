@@ -4,6 +4,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include "ClassifierBase.h"
+#include "Data.h"
 
 using namespace Eigen;
 

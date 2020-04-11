@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include "ClassifierCase1.h"
+#include "Plot.h"
 
 
 ClassifierCase1::ClassifierCase1(const std::vector<VectorXf> &_means,
