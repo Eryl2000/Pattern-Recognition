@@ -9,7 +9,7 @@
 #include <random>
 
 #include "Eigen/Dense"
-#include "ClassifierBase.h"
+#include "Data.h"
 
 using namespace Eigen;
 
@@ -37,7 +37,7 @@ VectorXf GetSampleMean(const vector<Data> & data)
 MatrixXf GetSampleCovariance(const vector<Data> & data)
 {
     VectorXf mean = GetSampleMean(data);
-    //std::cout << "Mean:" << std::endl << mean << std::endl;
+
     MatrixXf covariance = MatrixXf::Zero(mean.size(), mean.size());
     MatrixXf centered = MatrixXf::Zero(mean.size(), data.size());
     for(unsigned int i = 0; i < data.size(); i++)
@@ -45,23 +45,7 @@ MatrixXf GetSampleCovariance(const vector<Data> & data)
         centered.block(0, i, mean.size(), 1) = data[i].feature - mean;
     }
 
-    //std::cout << centered << std::endl;
-
     covariance = (centered * centered.adjoint()) / float(data.size() - 1);
-
-    /*
-    for(unsigned int i = 0; i < data.size(); i++)
-    {
-        covariance += ((data[i].feature - mean) * (data[i].feature - mean).transpose()) / (float)(data.size() - 1);
-
-        if(covariance(0,0) > 2)
-        {
-            std::cout << "i: " << std::to_string(i) << std::endl;
-        }
-    }
-    */
-
-    //covariance /= (float)(data.size() - 1);
 
     return covariance;
 }

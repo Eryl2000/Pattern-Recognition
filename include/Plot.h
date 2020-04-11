@@ -5,8 +5,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "ClassifierBase.h"
 #include "gnuplot.h"
+#include "Data.h"
 
 class PlotParams;
 
