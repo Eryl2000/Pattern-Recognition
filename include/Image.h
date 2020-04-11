@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "Eigen/Dense"
+
+using namespace Eigen;
+
 class CrCb{
 public:
     float Cr;
@@ -154,11 +158,13 @@ class Image {
 public:
     Image(char *fileName);
     Image(const Image &other);
+    Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRange = 255);
     ~Image();
 
     void WriteToFile(char *fileName);
     std::vector<RGB> ExtractSkinPixels(Image<RGB> mask) const;
     std::vector<PixelType> FlattenedPixels() const;
+    VectorXf FlattenedVector() const;
     std::vector<int> GetFlattenedMask() const;
     Image<PixelType> GetClassifiedImage(std::vector<int> flattenedSkinClassification);
 

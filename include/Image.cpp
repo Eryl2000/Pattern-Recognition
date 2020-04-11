@@ -13,6 +13,7 @@ Image<PixelType>::Image(char *fileName){
         exit(1);
     }
 
+    /*
     //Make sure file type is correct
     ifp.getline(header, bufferSize, '\n');
     if (header[0] != 'P'){
@@ -32,6 +33,14 @@ Image<PixelType>::Image(char *fileName){
     Cols = atoi(nextChar);
     ifp.getline(header, bufferSize, '\n');
     PixelValueRange = strtol(header, &nextChar, 0);
+    */
+
+   std::string magicNumber;
+   ifp >> magicNumber;
+   // TODO: Handle comments, works for this assignment
+   ifp >> Rows;
+   ifp >> Cols;
+   ifp >> PixelValueRange;
 
     //Create Pixels vector
     Pixels.resize(Rows);
@@ -49,6 +58,22 @@ Image<PixelType>::Image(const Image &other){
     Cols = other.Cols;
     PixelValueRange = other.PixelValueRange;
     Pixels = other.Pixels;
+}
+
+template<>
+Image<GreyScale>::Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRange)
+{
+    Rows= _Rows;
+    Cols = _Cols;
+    PixelValueRange = _PixelValueRange;
+    Pixels.resize(Rows);
+    for(int i = 0; i < Rows; i++){
+        Pixels[i].resize(Cols);
+        for(int j = 0; j < Cols; j++)
+        {
+            Pixels[i][j].value = (int)vect(i*Cols+j);
+        }
+    }
 }
 
 template <typename PixelType>
@@ -77,6 +102,22 @@ std::vector<PixelType> Image<PixelType>::FlattenedPixels() const
     for(unsigned int i = 0; i < Pixels.size(); i++)
     {
         ret.insert(ret.end(), Pixels[i].begin(), Pixels[i].end());
+    }
+
+    return ret;
+}
+
+template <>
+VectorXf Image<GreyScale>::FlattenedVector() const
+{
+    VectorXf ret = VectorXf::Zero(Rows*Cols);
+    for(unsigned int i = 0; i < Rows; i++)
+    {
+        for(unsigned int j = 0; j < Cols; j++)
+        {
+            ret(i*Cols+j) = (float) Pixels[i][j].value;
+        }
+        
     }
 
     return ret;
