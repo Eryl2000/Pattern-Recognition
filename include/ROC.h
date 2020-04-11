@@ -172,9 +172,10 @@ void PlotROC(std::string name, const vector<vector<MisclassificationData>> & roc
     plotString += "set ylabel 'False Negatives'\n";
 
     plotString += "plot ";
+    std::vector<std::string> plotColors = {"red", "blue", "green", "yellow"};
     for(unsigned int i = 0; i < rocValues.size(); i++)
     {
-        plotString += "'" + fileNames[i] + "' with lines lw 3 lc rgb 'red', ";
+        plotString += "'" + fileNames[i] + "' with lines lw 3 lc rgb '" + plotColors[i % plotColors.size()] + "', ";
     }
 
     if(verbose)
