@@ -70,13 +70,21 @@ std::vector<float> Eigenface::GetDetectionError(MatrixXf testingImages, float in
 // Returns the averageFace in image format
 Image<GreyScale> Eigenface::GetAverageImage() const
 {
-    return Image<GreyScale>(averageFace, imageRows, imageRows, imageRange);
+    return Image<GreyScale>(averageFace, imageRows, imageCols, imageRange);
 }
 
 // Returns the eigenfaces/vectors in image format on range [start, end)
 std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) const
 {
+    std::vector<Image<GreyScale>> eigenfaceImages(end - start);
+    for(int i = start; i < end; i++)
+    {
+        std::cout << eigenfaces.norm() << std::endl;
+        // TODO: Take normalized eigenface and convert back to 255 scale
+        eigenfaceImages[i - start] = Image<GreyScale>(VectorXf(eigenfaces.col(i) * imageRange), imageRows, imageCols, imageRange);
+    }
 
+    return eigenfaceImages;
 }
 
 // Performs the work of the constructor
@@ -98,6 +106,9 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
         {
             continue;
         }
+
+        // TODO: Sort/Label images by their ID
+        // TODO: Remove images from training set (first 50 of problem B)
 
         //std::cout << "Opening: " << ent->d_name << std::endl;
 
@@ -146,7 +157,10 @@ void Eigenface::SetEigenvaluesEigenvectors(MatrixXf normalizedImages)
     MatrixXf dotNormalized = normalizedImages.transpose() * normalizedImages;
     EigenSolver<MatrixXf> solver(dotNormalized);
     eigenvalues = solver.eigenvalues().real();
-    eigenfaces = normalizedImages * solver.eigenvectors().real();
+
+    // TODO: Normalize correctly, currently getting magnitude of 34.696
+        // Also there are values out of range initially which make sense that they appear but how to represent?
+    eigenfaces = (normalizedImages * solver.eigenvectors().real()).colwise().normalized();
 }
 
 // images - (N^2 x M, K, 1)-matrix
@@ -187,6 +201,7 @@ float Eigenface::MahalanobisDistance(VectorXf eigenspaceImage1, VectorXf eigensp
 
 }
 
+// TODO: Remove function, based on reading closer ek is said to be the Mahalanobis Distance between test image and closest training image
 // Returns the EuclideanDistance between the eigenspace representations of the two images
 // eigenspaceImage - (M)-vector
 // eigenCount - number of eigenvectors considered in the calculation

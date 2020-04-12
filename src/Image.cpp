@@ -1,5 +1,14 @@
 #include <stdexcept>
+#include <algorithm>
 #include "Image.h"
+
+template <typename PixelType>
+Image<PixelType>::Image()
+{
+    Rows = 0;
+    Cols = 0;
+    PixelValueRange = 0;
+}
 
 template <typename PixelType>
 Image<PixelType>::Image(char *fileName){
@@ -61,6 +70,17 @@ Image<PixelType>::Image(const Image &other){
     Pixels = other.Pixels;
 }
 
+template <typename PixelType>
+Image<PixelType> & Image<PixelType>::operator=(const Image<PixelType> & other)
+{
+    Rows = other.Rows;
+    Cols = other.Cols;
+    PixelValueRange = other.PixelValueRange;
+    Pixels = other.Pixels;
+
+    return *this;
+}
+
 template<>
 Image<GreyScale>::Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRange)
 {
@@ -72,7 +92,9 @@ Image<GreyScale>::Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRang
         Pixels[i].resize(Cols);
         for(int j = 0; j < Cols; j++)
         {
-            Pixels[i][j].value = (int)vect(i*Cols+j);
+            int value = vect(i*Cols+j);
+            value = std::clamp(value, 0, PixelValueRange);
+            Pixels[i][j].value = value;
         }
     }
 }
@@ -112,9 +134,9 @@ template <>
 VectorXf Image<GreyScale>::FlattenedVector() const
 {
     VectorXf ret = VectorXf::Zero(Rows*Cols);
-    for(unsigned int i = 0; i < Rows; i++)
+    for(int i = 0; i < Rows; i++)
     {
-        for(unsigned int j = 0; j < Cols; j++)
+        for(int j = 0; j < Cols; j++)
         {
             ret(i*Cols+j) = (float) Pixels[i][j].value;
         }

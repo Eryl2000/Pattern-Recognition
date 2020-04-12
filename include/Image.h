@@ -157,10 +157,13 @@ public:
 template <typename PixelType>
 class Image {
 public:
+    Image();
     Image(char *fileName);
     Image(const Image &other);
     Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRange = 255);
     ~Image();
+
+    Image & operator=(const Image & other);
 
     void WriteToFile(char *fileName);
     std::vector<RGB> ExtractSkinPixels(Image<RGB> mask) const;
