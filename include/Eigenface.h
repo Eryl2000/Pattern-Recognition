@@ -27,16 +27,21 @@ class Eigenface
         // (M x M)-matrix with columns of the eigenspace representation of each training image
         MatrixXf eigenspaceTrainingValues;
 
+        // Image information used for outputting images
+        int imageRows, imageCols, imageRange;
+
         // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
         Eigenface(std::string trainingDirectory);
 
         // testingImages - (N^2 x K)-matrix of testing images
-        // Returns the image ID of the closest topMatches matches for each column of testingImages
-        std::vector<std::vector<int>> GetClosestMatches(MatrixXf testingImages, int topMatches) const;
+        // infoRatio - percent information perserved / percent eigenvalues used
+        // Returns the image index of the closest topMatches matches for each column of testingImages
+        std::vector<std::vector<int>> GetClosestMatches(MatrixXf testingImages, int topMatches, float infoRatio) const;
 
         // testingImages - (N^2 x K)-matrix of testing images
+        // infoRatio - percent information perserved / percent eigenvalues used
         // Returns the error/distance between the reconstructed and normalized image for each column of testingImages
-        std::vector<float> GetDetectionError(MatrixXf testingImages) const;
+        std::vector<float> GetDetectionError(MatrixXf testingImages, float infoRatio) const;
 
         // Returns the averageFace in image format
         Image<GreyScale> GetAverageImage() const;

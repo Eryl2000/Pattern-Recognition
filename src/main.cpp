@@ -8,10 +8,11 @@
 int main(int argc, char *argv[])
 {
     std::cout << "Project 3" << std::endl;
-
-    Image<GreyScale> testImage("Faces_FA_FB/fa_H/00001_930831_fa_a.pgm");
-    VectorXf flattened = testImage.FlattenedVector();
-    Image<GreyScale> fromFlattened(flattened, testImage.Rows, testImage.Cols);
+    std::cout << "Training Eigenfaces" << std::endl;
+    Eigenface eigenface("./Faces_FA_FB/fa_H/");
+    std::cout << "Outputting Average Face" << std::endl;
+    Image<GreyScale> averageFace = eigenface.GetAverageImage();
+    averageFace.WriteToFile("averageFace.pgm");
 
     return 0;
 }
