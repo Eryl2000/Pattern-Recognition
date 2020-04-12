@@ -11,9 +11,7 @@ Image<PixelType>::Image()
 }
 
 template <typename PixelType>
-Image<PixelType>::Image(char *fileName){
-    unsigned int bufferSize = 100;
-    char header[bufferSize];
+Image<PixelType>::Image(std::string fileName){
     std::ifstream ifp;
 
     //Open file and check for errors
@@ -22,28 +20,6 @@ Image<PixelType>::Image(char *fileName){
         std::cout << "Can't read image: " << fileName << std::endl;
         exit(1);
     }
-
-    /*
-    //Make sure file type is correct
-    ifp.getline(header, bufferSize, '\n');
-    if (header[0] != 'P'){
-        std::cout << "Image " << fileName << " is not PGM" << std::endl;
-        exit(1);
-    }
-
-    //Read and skip all comments
-    ifp.getline(header, bufferSize, '\n');
-    while(header[0] == '#'){
-        ifp.getline(header, bufferSize, '\n');
-    }
-    
-    //Read header data
-    char *nextChar;
-    Rows = strtol(header, &nextChar, 0);
-    Cols = atoi(nextChar);
-    ifp.getline(header, bufferSize, '\n');
-    PixelValueRange = strtol(header, &nextChar, 0);
-    */
 
    std::string magicNumber;
    ifp >> magicNumber;
@@ -93,7 +69,7 @@ Image<GreyScale>::Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRang
         for(int j = 0; j < Cols; j++)
         {
             int value = vect(i*Cols+j);
-            value = std::clamp(value, 0, PixelValueRange);
+            //value = std::clamp(value, 0, PixelValueRange);
             Pixels[i][j].value = value;
         }
     }
@@ -219,7 +195,7 @@ bool Image<RGB>::IsBlack(RGB pixel) const
 }
 
 template <>
-void Image<GreyScale>::setData(char *fileName, std::ifstream &ifp){
+void Image<GreyScale>::setData(std::string fileName, std::ifstream &ifp){
     unsigned char *charImage = (unsigned char *) new unsigned char [Rows * Cols];
     ifp.read(reinterpret_cast<char *>(charImage), (Rows * Cols) * sizeof(unsigned char));
     if (ifp.fail()) {
@@ -239,7 +215,7 @@ void Image<GreyScale>::setData(char *fileName, std::ifstream &ifp){
 }
 
 template <>
-void Image<RGB>::setData(char *fileName, std::ifstream &ifp){
+void Image<RGB>::setData(std::string fileName, std::ifstream &ifp){
     unsigned char *charImage = (unsigned char *) new unsigned char [3 * Rows * Cols];
     ifp.read(reinterpret_cast<char *>(charImage), (3 * Rows * Cols) * sizeof(unsigned char));
     if (ifp.fail()) {
@@ -261,7 +237,7 @@ void Image<RGB>::setData(char *fileName, std::ifstream &ifp){
 }
 
 template <>
-void Image<GreyScale>::WriteToFile(char *fileName){
+void Image<GreyScale>::WriteToFile(std::string fileName){
     std::ofstream ofp;
     unsigned char *charImage = (unsigned char *) new unsigned char[Rows * Cols];
 
@@ -292,7 +268,7 @@ void Image<GreyScale>::WriteToFile(char *fileName){
 }
 
 template <>
-void Image<RGB>::WriteToFile(char *fileName){
+void Image<RGB>::WriteToFile(std::string fileName){
     std::ofstream ofp;
     unsigned char *charImage = (unsigned char *) new unsigned char[3 * Rows * Cols];
 
