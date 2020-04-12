@@ -8,6 +8,8 @@
 
 int main(int argc, char *argv[])
 {
+    std::string outputImagePath("output_images/");
+
     std::cout << "Project 3" << std::endl;
     Eigenface eigenface("./Faces_FA_FB/fa_H/");
     std::cout << "Outputting Average Face" << std::endl;
@@ -18,13 +20,13 @@ int main(int argc, char *argv[])
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 3);
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile(std::string("eigenface_good" + std::to_string(i) + ".pgm"));
+        eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_good" + std::to_string(i) + ".pgm"));
     }
 
     eigenFaces = eigenface.GetEigenfaceImages(eigenface.eigenfaces.cols() - 3, eigenface.eigenfaces.cols());
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile(std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
+        eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
 
     return 0;
