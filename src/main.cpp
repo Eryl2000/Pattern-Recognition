@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     Eigenface eigenface("./Faces_FA_FB/fa_H/");
     std::cout << "Outputting Average Face" << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
-    averageFace.WriteToFile("averageFace.pgm");
+    averageFace.WriteToFile(outputImagePath + std::string("averageFace.pgm"));
 
     std::cout << "Outputting Eigenfaces" << std::endl;
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 10);
