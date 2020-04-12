@@ -54,6 +54,9 @@ class Eigenface
         // Performs the work of the constructor
         void GetTrainingData(std::string trainingDirectory);
 
+        // Tranforms the vector to be in range [0, range]
+        VectorXf AdjustToImageRange(VectorXf image, int range) const;
+
         // Returns the (N^2)-vector of the average of the colums of (N^2 x M)-matrix images
         VectorXf GetAverageFace(MatrixXf images) const;
 

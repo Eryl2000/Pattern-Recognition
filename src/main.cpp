@@ -17,13 +17,13 @@ int main(int argc, char *argv[])
     averageFace.WriteToFile("averageFace.pgm");
 
     std::cout << "Outputting Eigenfaces" << std::endl;
-    std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 3);
+    std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 10);
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_good" + std::to_string(i) + ".pgm"));
     }
 
-    eigenFaces = eigenface.GetEigenfaceImages(eigenface.eigenfaces.cols() - 3, eigenface.eigenfaces.cols());
+    eigenFaces = eigenface.GetEigenfaceImages(eigenface.eigenfaces.cols() - 10, eigenface.eigenfaces.cols());
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));

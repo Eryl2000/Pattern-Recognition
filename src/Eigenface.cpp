@@ -84,8 +84,10 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
     std::vector<Image<GreyScale>> eigenfaceImages(end - start);
     for(int i = start; i < end; i++)
     {
-        // TODO: Take normalized eigenface and convert back to 255 scale
-        eigenfaceImages[i - start] = Image<GreyScale>(VectorXf(eigenfaces.col(i) * imageRange), imageRows, imageCols, imageRange);
+        // Take normalized eigenface and convert back to 255 scale
+        VectorXf eigenfaceImageScale = AdjustToImageRange(eigenfaces.col(i), imageRange);
+
+        eigenfaceImages[i - start] = Image<GreyScale>(eigenfaceImageScale, imageRows, imageCols, imageRange);
     }
 
     return eigenfaceImages;
@@ -150,6 +152,15 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
     MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
     std::cout << "    Finding eigenvectors..." << std::endl;
     SetEigenvaluesEigenvectors(normalizedImages);
+}
+
+
+// Tranforms the vector to be in range [0, range]
+VectorXf Eigenface::AdjustToImageRange(VectorXf image, int range) const
+{
+    image -= VectorXf::Ones(image.size()) * image.minCoeff();
+    image = image.array() * (VectorXf::Ones(image.size()) / image.maxCoeff() * range).array();
+    return image;
 }
 
 
