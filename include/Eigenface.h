@@ -52,7 +52,7 @@ class Eigenface
 
     private:
         // Performs the work of the constructor
-        void GetTrainingData(std::string trainingDirectory);
+        MatrixXf GetTrainingData(std::string trainingDirectory);
 
         // Tranforms the vector to be in range [0, range]
         VectorXf AdjustToImageRange(const VectorXf &image, int range) const;

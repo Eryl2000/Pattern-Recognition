@@ -18,7 +18,21 @@
 Eigenface::Eigenface(std::string trainingDirectory)
 {
     std::cout << "Loading training image files..." << std::endl;
-    GetTrainingData(trainingDirectory);
+    MatrixXf imagesMatrix = GetTrainingData(trainingDirectory);
+    if(imagesMatrix.rows() == 0 && imagesMatrix.cols() == 0){
+        return;
+    }
+
+    std::cout << "Training Eigenfaces..." << std::endl;
+
+    std::cout << "    Finding average face..." << std::endl;
+    averageFace = GetAverageFace(imagesMatrix);
+
+    std::cout << "    Normalizing images..." << std::endl;
+    MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
+
+    std::cout << "    Finding eigenvectors..." << std::endl;
+    SetEigenvaluesEigenvectors(normalizedImages);
 }
 
 
@@ -95,13 +109,14 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
 
 
 // Performs the work of the constructor
-void Eigenface::GetTrainingData(std::string trainingDirectory)
+MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
 {
     DIR *dir = opendir (trainingDirectory.c_str());
     if (dir == NULL)
     {
         std::cerr << "Could not open training directory!" << std::endl;
-        return;
+        MatrixXf ret(0, 0);
+        return ret;
     }
     struct dirent *ent;
 
@@ -136,7 +151,8 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
     if(images.size() == 0)
     {
         std::cerr << "No images were found in the provided training directory!" << std::endl;
-        return;
+        MatrixXf ret(0, 0);
+        return ret;
     }
 
     MatrixXf imagesMatrix(images[0].size(), images.size());
@@ -144,14 +160,7 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
     {
         imagesMatrix.col(i) = images[i];
     }
-
-    std::cout << "Training Eigenfaces..." << std::endl;
-    std::cout << "    Finding average face..." << std::endl;
-    averageFace = GetAverageFace(imagesMatrix);
-    std::cout << "    Normalizing images..." << std::endl;
-    MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
-    std::cout << "    Finding eigenvectors..." << std::endl;
-    SetEigenvaluesEigenvectors(normalizedImages);
+    return imagesMatrix;
 }
 
 
@@ -180,9 +189,6 @@ void Eigenface::SetEigenvaluesEigenvectors(const MatrixXf &normalizedImages)
     MatrixXf dotNormalized = normalizedImages.transpose() * normalizedImages;
     EigenSolver<MatrixXf> solver(dotNormalized);
     eigenvalues = solver.eigenvalues().real();
-
-    // TODO: Normalize correctly, currently getting magnitude of 34.696
-        // Also there are values out of range initially which make sense that they appear but how to represent?
     eigenfaces = (normalizedImages * solver.eigenvectors().real()).colwise().normalized();
 }
 
