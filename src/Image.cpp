@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include "Image.h"
 
 template <typename PixelType>
 Image<PixelType>::Image(char *fileName){
@@ -81,8 +82,8 @@ Image<PixelType>::~Image(){
 
 }
 
-template <typename PixelType>
-std::vector<RGB> Image<PixelType>::ExtractSkinPixels(Image<RGB> mask) const{
+template <>
+std::vector<RGB> Image<RGB>::ExtractSkinPixels(Image<RGB> mask) const{
     std::vector<RGB> ret;
     for(int i = 0; i < mask.Rows; ++i){
         for(int j = 0; j < mask.Cols; ++j)
@@ -131,7 +132,7 @@ std::vector<int> Image<PixelType>::GetFlattenedMask() const
     for(int i = 0; i < Rows; ++i){
         for(int j = 0; j < Cols; ++j)
         {
-            if(Pixels[i][j] != RGB::Black()){
+            if(!IsBlack(Pixels[i][j])){
                 ret.push_back(1);
             } else
             {
@@ -159,7 +160,7 @@ Image<PixelType> Image<PixelType>::GetClassifiedImage(std::vector<int> flattened
             if(flattenedSkinClassification[i * Cols + j] == 0)
             {
                 //std::cout << "Non-skin!" << std::endl;
-                ret.Pixels[i][j] = RGB::Black();
+                SetBlack(ret.Pixels[i][j]);
                 no_skinCount++;
             }
         }
@@ -169,6 +170,30 @@ Image<PixelType> Image<PixelType>::GetClassifiedImage(std::vector<int> flattened
     std::cout << "No skin: " << no_skinCount << std::endl;
 
     return ret;
+}
+
+template <>
+void Image<GreyScale>::SetBlack(GreyScale & pixel)
+{
+    pixel.value = 0;
+}
+
+template <>
+bool Image<GreyScale>::IsBlack(GreyScale pixel) const
+{
+    return pixel.value == 0;
+}
+
+template <>
+void Image<RGB>::SetBlack(RGB & pixel)
+{
+    pixel = RGB::Black();
+}
+
+template <>
+bool Image<RGB>::IsBlack(RGB pixel) const
+{
+    return pixel == RGB::Black();
 }
 
 template <>
@@ -276,3 +301,6 @@ void Image<RGB>::WriteToFile(char *fileName){
 
     delete[] charImage;
 }
+
+template class Image<RGB>;
+template class Image<GreyScale>;

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include "Data.h"
 
 using namespace Eigen;
 
@@ -168,6 +169,9 @@ public:
     std::vector<int> GetFlattenedMask() const;
     Image<PixelType> GetClassifiedImage(std::vector<int> flattenedSkinClassification);
 
+    void SetBlack(PixelType & pixel);
+    bool IsBlack(PixelType pixel) const;
+
     int Rows;
     int Cols;
     int PixelValueRange;
@@ -176,7 +180,5 @@ public:
 private:
     void setData(char *fileName, std::ifstream &ifp);
 };
-
-#include "Image.cpp"
 
 #endif
