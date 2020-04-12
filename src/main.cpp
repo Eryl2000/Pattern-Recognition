@@ -9,21 +9,22 @@
 int main(int argc, char *argv[])
 {
     std::cout << "Project 3" << std::endl;
-    std::cout << "Training Eigenfaces" << std::endl;
     Eigenface eigenface("./Faces_FA_FB/fa_H/");
     std::cout << "Outputting Average Face" << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
     averageFace.WriteToFile("averageFace.pgm");
+
+    std::cout << "Outputting Eigenfaces" << std::endl;
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 3);
-    for(uint i = 0; i < eigenFaces.size(); i++)
+    for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile((char *)("eigenface_good" + std::to_string(i) + ".pgm").c_str());
+        eigenFaces[i].WriteToFile(std::string("eigenface_good" + std::to_string(i) + ".pgm"));
     }
 
     eigenFaces = eigenface.GetEigenfaceImages(eigenface.eigenfaces.cols() - 3, eigenface.eigenfaces.cols());
-    for(uint i = 0; i < eigenFaces.size(); i++)
+    for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile((char *)("eigenface_bad" + std::to_string(i) + ".pgm").c_str());
+        eigenFaces[i].WriteToFile(std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
 
     return 0;

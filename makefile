@@ -6,9 +6,9 @@ OBJ_DIR = obj
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CompilerFlags = -std=c++17 -I. -static-libgcc -static-libstdc++
-Warnings = -Wall -Wextra -Wdouble-promotion -Wswitch-default \
- -Wshadow -Wno-reorder
+CompilerFlags = -std=gnu++17 -I. -static-libgcc -static-libstdc++
+Warnings = -Wall -Wextra -Wdouble-promotion -Wswitch-default -Wshadow \
+ -Wno-reorder -Wno-unused-function -Wno-unused-parameter
 Sanitize = -fsanitize=address -fsanitize=undefined
 TestingFlags = -Og -g
 ReleaseFlags = -O3

@@ -17,6 +17,7 @@
 // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
 Eigenface::Eigenface(std::string trainingDirectory)
 {
+    std::cout << "Loading training image files..." << std::endl;
     GetTrainingData(trainingDirectory);
 }
 
@@ -79,7 +80,6 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
     std::vector<Image<GreyScale>> eigenfaceImages(end - start);
     for(int i = start; i < end; i++)
     {
-        std::cout << eigenfaces.norm() << std::endl;
         // TODO: Take normalized eigenface and convert back to 255 scale
         eigenfaceImages[i - start] = Image<GreyScale>(VectorXf(eigenfaces.col(i) * imageRange), imageRows, imageCols, imageRange);
     }
@@ -138,8 +138,12 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
         imagesMatrix.col(i) = images[i];
     }
 
+    std::cout << "Training Eigenfaces..." << std::endl;
+    std::cout << "    Finding average face..." << std::endl;
     averageFace = GetAverageFace(imagesMatrix);
+    std::cout << "    Normalizing images..." << std::endl;
     MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
+    std::cout << "    Finding eigenvectors..." << std::endl;
     SetEigenvaluesEigenvectors(normalizedImages);
 }
 

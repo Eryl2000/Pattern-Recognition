@@ -158,14 +158,14 @@ template <typename PixelType>
 class Image {
 public:
     Image();
-    Image(char *fileName);
+    Image(std::string fileName);
     Image(const Image &other);
     Image(VectorXf vect, int _Rows, int _Cols, int _PixelValueRange = 255);
     ~Image();
 
     Image & operator=(const Image & other);
 
-    void WriteToFile(char *fileName);
+    void WriteToFile(std::string fileName);
     std::vector<RGB> ExtractSkinPixels(Image<RGB> mask) const;
     std::vector<PixelType> FlattenedPixels() const;
     VectorXf FlattenedVector() const;
@@ -181,7 +181,7 @@ public:
     std::vector<std::vector<PixelType>> Pixels;
 
 private:
-    void setData(char *fileName, std::ifstream &ifp);
+    void setData(std::string fileName, std::ifstream &ifp);
 };
 
 #endif
