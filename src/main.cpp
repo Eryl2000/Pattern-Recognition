@@ -3,6 +3,7 @@
 #include "ROC.h"
 #include "MLEstimation.h"
 #include "Image.h"
+#include "Eigenface.h"
 
 int main(int argc, char *argv[])
 {
