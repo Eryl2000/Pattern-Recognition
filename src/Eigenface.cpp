@@ -147,6 +147,8 @@ void Eigenface::GetTrainingData(std::string trainingDirectory)
     MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
     std::cout << "    Finding eigenvectors..." << std::endl;
     SetEigenvaluesEigenvectors(normalizedImages);
+    std::cout << "    Computing eigenspace representations for each training image" << std::endl;
+    eigenspaceTrainingValues = ComputeEigenSpaceValues(normalizedImages);
 }
 
 // Tranforms the vector to be in range [0, range]
