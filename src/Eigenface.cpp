@@ -34,7 +34,7 @@ Eigenface::Eigenface(std::string trainingDirectory)
     std::cout << "    Finding eigenvectors..." << std::endl;
     SetEigenvaluesEigenvectors(normalizedImages);
 
-    std::cout << "    Computing eigenspace representations for each training image" << std::endl;
+    std::cout << "    Computing eigenspace representations for each training image..." << std::endl;
     eigenspaceTrainingValues = ComputeEigenSpaceValues(normalizedImages);
 }
 
@@ -148,12 +148,15 @@ MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
             continue;
         }
 
+        std::string filename = std::string(ent->d_name);
+        imageNames.push_back(filename);
+        
         // TODO: Sort/Label images by their ID
         // TODO: Remove images from training set (first 50 of problem B)
 
         //std::cout << "Opening: " << ent->d_name << std::endl;
 
-        Image<GreyScale> currentTrainingImage((char *)(trainingDirectory + std::string(ent->d_name)).c_str());
+        Image<GreyScale> currentTrainingImage(trainingDirectory + filename);
         images.push_back(currentTrainingImage.FlattenedVector());
 
         if(!imageInfoSet)
@@ -253,4 +256,14 @@ float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const Vec
 float Eigenface::EuclideanDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const
 {
 
+}
+
+
+// Compares two image names (from Faces_FA_FB naming convention)
+// Returns true if the images are of the same person, false if not
+bool Eigenface::ImageNamesEqual(std::string name1, std::string name2) const{
+    std::string delimiter = "_";
+    std::string token1 = name1.substr(0, name1.find(delimiter));
+    std::string token2 = name2.substr(0, name2.find(delimiter));
+    return token1 == token2;
 }

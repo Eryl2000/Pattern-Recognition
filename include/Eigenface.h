@@ -27,6 +27,8 @@ class Eigenface
         // (M x M)-matrix with columns of the eigenspace representation of each training image
         MatrixXf eigenspaceTrainingValues;
 
+        std::vector<std::string> imageNames;
+
         // Image information used for outputting images
         int imageRows, imageCols, imageRange;
 
@@ -96,6 +98,10 @@ class Eigenface
         // eigenCount - number of eigenvectors considered in the calculation
             // Must be less than or equal to M
         float EuclideanDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const;
+
+        // Compares two image names (from Faces_FA_FB naming convention)
+        // Returns true if the images are of the same person, false if not
+        bool ImageNamesEqual(std::string name1, std::string name2) const;
 };
 
 
