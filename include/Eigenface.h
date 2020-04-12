@@ -48,7 +48,16 @@ class Eigenface
 
         // Returns the eigenfaces/vectors in image format on range [start, end)
         std::vector<Image<GreyScale>> GetEigenfaceImages(int start, int end) const;
-    
+
+        // eigenspaceValues - (M x M, K, 1)-matrix
+        // infoRatio - percent information perserved / percent eigenvalues used
+            // Must be less than or equal to M
+        // Reconstructs the columns of eigenspaceValues using the first eigenCount eigenfaces
+        MatrixXf ReconstructImages(const MatrixXf &eigenspaceValues, float infoRatio) const;
+
+        // Returns images of the passed face vector
+        // Uses imagesRows, imageCols, and imageRange
+        Image<GreyScale> GetImage(const VectorXf & image) const;
 
     private:
         // Performs the work of the constructor
@@ -72,12 +81,6 @@ class Eigenface
         // images - (N^2 x M, K, 1)-matrix
         // Subtracts the average face from each column of images and returns the resulting value
         MatrixXf NormalizeImages(const MatrixXf &images) const;
-
-        // eigenspaceValues - (M x M, K, 1)-matrix
-        // eigenCount - number of eigenvectors used in the reconstruction
-            // Must be less than or equal to M
-        // Reconstructs the columns of eigenspaceValues using the first eigenCount eigenfaces
-        MatrixXf ReconstructImages(const MatrixXf &eigenspaceValues, int eigenCount) const;
 
         // Outputs the averageFace, eigenFaces, and the eigenspaceTrainingValues to a file
         void OutputTrainingData(std::string outputFileName) const;

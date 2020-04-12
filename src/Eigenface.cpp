@@ -61,7 +61,7 @@ std::vector<std::vector<int>> Eigenface::GetClosestMatches(const MatrixXf &testi
             VectorXf currentTrainingEigenspaceValues = eigenspaceTrainingValues.col(j);
 
             // Compute Mahalanobis distance between eigenspace coefficients
-            currentTopMatches[j] = MahalanobisDistance(currentTestingEigenspaceValues, currentTrainingEigenspaceValues, (int) (eigenfaces.cols() * infoRatio));
+            currentTopMatches[j] = MahalanobisDistance(currentTestingEigenspaceValues, currentTrainingEigenspaceValues, infoRatio);
         }
 
         // Find the top N faces with the lowest distance
@@ -104,10 +104,26 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
         // Take normalized eigenface and convert back to 255 scale
         VectorXf eigenfaceImageScale = AdjustToImageRange(eigenfaces.col(i), imageRange);
 
-        eigenfaceImages[i - start] = Image<GreyScale>(eigenfaceImageScale, imageRows, imageCols, imageRange);
+        eigenfaceImages[i - start] = GetImage(eigenfaceImageScale);
     }
 
     return eigenfaceImages;
+}
+
+
+// eigenspaceValues - (M x M, K, 1)-matrix
+// infoRatio - percent information perserved / percent eigenvalues used
+    // Must be less than or equal to M
+// Reconstructs the columns of eigenspaceValues using the first eigenCount eigenfaces
+MatrixXf Eigenface::ReconstructImages(const MatrixXf &eigenspaceValues, float infoRatio) const
+{
+    int eigenCount = eigenfaces.cols() * (infoRatio / 100.0f);
+    return (eigenfaces.block(0, 0, eigenfaces.rows(), eigenCount) * eigenspaceValues.block(0, 0, eigenCount, eigenspaceValues.cols())).colwise() + averageFace;
+}
+
+Image<GreyScale> Eigenface::GetImage(const VectorXf & image) const
+{
+    return Image<GreyScale>(image, imageRows, imageCols, imageRange);
 }
 
 
@@ -209,16 +225,6 @@ MatrixXf Eigenface::ComputeEigenSpaceValues(const MatrixXf &images) const
 MatrixXf Eigenface::NormalizeImages(const MatrixXf &images) const
 {
     return images.colwise() - averageFace;
-}
-
-
-// eigenspaceValues - (M x M, K, 1)-matrix
-// eigenCount - number of eigenvectors used in the reconstruction
-    // Must be less than or equal to M
-// Reconstructs the columns of eigenspaceValues using the first eigenCount eigenfaces
-MatrixXf Eigenface::ReconstructImages(const MatrixXf &eigenspaceValues, int eigenCount) const
-{
-
 }
 
 
