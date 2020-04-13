@@ -36,3 +36,10 @@
 
 # Object Files
 obj/
+
+# Output Images
+output_images/*
+!output_images/OUTPUT_README.md
+
+plots/*
+!plots/PLOT_README.md
