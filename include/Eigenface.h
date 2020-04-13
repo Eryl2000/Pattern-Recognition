@@ -5,6 +5,7 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "Image.h"
+#include "EigenfaceError.h"
 
 using namespace Eigen;
 
@@ -40,8 +41,8 @@ class Eigenface
 
         // testingImages - (N^2 x K)-matrix of testing images
         // infoRatio - percent information perserved / percent eigenvalues used
-        // Returns the image index of the closest topMatches matches for each column of testingImages
-        std::vector<std::vector<int>> GetClosestMatches(const MatrixXf &testingImages, int topMatches, float infoRatio) const;
+        // Returns the image index and error of the closest topMatches matches for each column of testingImages
+        std::vector<std::vector<EigenfaceError>> GetClosestMatches(const MatrixXf &testingImages, int topMatches, float infoRatio) const;
 
         // testingImages - (N^2 x K)-matrix of testing images
         // infoRatio - percent information perserved / percent eigenvalues used
@@ -64,9 +65,12 @@ class Eigenface
         // Uses imagesRows, imageCols, and imageRange
         Image<GreyScale> GetImage(const VectorXf & image) const;
 
+        // Returns (N^2 x M, K)-matrix in which each column is an image in directory
+        // imageNames - populated with the names of each image corresponding with each column
+        // exampleImage - example image from the directory used to extract image info
+        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & imageNames, Image<GreyScale> & exampleImage) const;
+
     private:
-        // Performs the work of the constructor
-        MatrixXf GetTrainingData(std::string trainingDirectory);
 
         // Tranforms the vector to be in range [0, range]
         VectorXf AdjustToImageRange(const VectorXf &image, int range) const;

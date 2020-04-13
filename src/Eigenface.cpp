@@ -12,6 +12,7 @@
 #include <numeric>
 #include <regex>
 #include <unistd.h>
+#include <stdexcept>
 
 #include "Image.h"
 
@@ -23,7 +24,14 @@ Eigenface::Eigenface(std::string modelName, std::string trainingDirectory)
         ReadTrainingData(modelName);
     } else{
         std::cout << "Loading training image files..." << std::endl;
-        MatrixXf imagesMatrix = GetTrainingData(trainingDirectory);
+
+        Image<GreyScale> exampleImage;
+        MatrixXf imagesMatrix = GetImageMatrix(trainingDirectory, imageNames, exampleImage);
+
+        imageCols = exampleImage.Cols;
+        imageRows = exampleImage.Rows;
+        imageRange = exampleImage.PixelValueRange;
+
         if(imagesMatrix.rows() == 0 && imagesMatrix.cols() == 0){
             return;
         }
@@ -60,18 +68,17 @@ Eigenface::Eigenface(const Eigenface &other){
     imageRange = other.imageRange;
 }
 
-
 // testingImages - (N^2 x K)-matrix of testing images
 // infoRatio - percent information perserved / percent eigenvalues used
-// Returns the image index of the closest topMatches matches for each column of testingImages
-std::vector<std::vector<int>> Eigenface::GetClosestMatches(const MatrixXf &testingImages, int topMatches, float infoRatio) const
+// Returns the image index and error of the closest topMatches matches for each column of testingImages
+std::vector<std::vector<EigenfaceError>> Eigenface::GetClosestMatches(const MatrixXf &testingImages, int topMatches, float infoRatio) const
 {
     // Subtract mean face
     MatrixXf normalizedTestingImages = NormalizeImages(testingImages);
     // Compute eigenspace representation
     MatrixXf testingEigenspaceValues = ComputeEigenSpaceValues(normalizedTestingImages);
 
-    std::vector<std::vector<int>> topMatchesAllImages(testingImages.cols());
+    std::vector<std::vector<EigenfaceError>> topMatchesAllImages(testingImages.cols());
     for(int i = 0; i < testingEigenspaceValues.cols(); i++)
     {
         std::vector<float> currentTopMatches(eigenspaceTrainingValues.cols());
@@ -87,14 +94,15 @@ std::vector<std::vector<int>> Eigenface::GetClosestMatches(const MatrixXf &testi
         }
 
         // Find the top N faces with the lowest distance
-        std::vector<int> currentIndices(currentTopMatches.size());
-        std::iota(currentIndices.begin(), currentIndices.end(), 0);
+        std::vector<EigenfaceError> currentError(currentTopMatches.size());
+        for(unsigned int j = 0; j < currentError.size(); j++)
+        {
+            currentError[j] = EigenfaceError(i);
+        }
 
-        std::sort(currentIndices.begin(), currentIndices.end(), [&currentTopMatches] (int lhs, int rhs) {
-            return currentTopMatches[lhs] < currentTopMatches[rhs];
-        });
+        std::sort(currentError.begin(), currentError.end());
 
-        topMatchesAllImages[i] = std::vector<int>(currentIndices.begin(), currentIndices.begin() + topMatches);
+        topMatchesAllImages[i] = std::vector<EigenfaceError>(currentError.begin(), currentError.begin() + topMatches);
     }
 
     return topMatchesAllImages;
@@ -149,10 +157,17 @@ Image<GreyScale> Eigenface::GetImage(const VectorXf & image) const
 }
 
 
-// Performs the work of the constructor
-MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
+// Returns (N^2 x M, K)-matrix in which each column is an image in directory
+// imageNames - populated with the names of each image corresponding with each column
+// exampleImage - example image from the directory used to extract image info
+MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & imageNames, Image<GreyScale> & exampleImage) const
 {
-    DIR *dir = opendir (trainingDirectory.c_str());
+    if(imageNames.size() != 0)
+    {
+        throw std::invalid_argument("Eigenface::GetImageMatrix imageNames must be empty when the function is called");
+    }
+
+    DIR *dir = opendir (directory.c_str());
     if (dir == NULL)
     {
         std::cerr << "Could not open training directory!" << std::endl;
@@ -178,14 +193,12 @@ MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
 
         //std::cout << "Opening: " << ent->d_name << std::endl;
 
-        Image<GreyScale> currentTrainingImage(trainingDirectory + filename);
+        Image<GreyScale> currentTrainingImage(directory + filename);
         images.push_back(currentTrainingImage.FlattenedVector());
 
         if(!imageInfoSet)
         {
-            imageCols = currentTrainingImage.Cols;
-            imageRows = currentTrainingImage.Rows;
-            imageRange = currentTrainingImage.PixelValueRange;
+            exampleImage = currentTrainingImage;
             imageInfoSet = true;
         }
     }
