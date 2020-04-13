@@ -17,7 +17,9 @@
 #include "Image.h"
 
 // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-Eigenface::Eigenface(std::string modelName, std::string trainingDirectory)
+// intruderCount is initialized, the value is only used if the model file cannot be found
+Eigenface::Eigenface(std::string modelName, std::string trainingDirectory, int _intruderCount)
+: intruderCount(_intruderCount)
 {
     if(access(modelName.c_str(), F_OK) != -1){
         std::cout << "    Loading trained model from file..." << std::endl;
@@ -26,7 +28,7 @@ Eigenface::Eigenface(std::string modelName, std::string trainingDirectory)
         std::cout << "Loading training image files..." << std::endl;
 
         Image<GreyScale> exampleImage;
-        MatrixXf imagesMatrix = GetImageMatrix(trainingDirectory, imageNames, exampleImage);
+        MatrixXf imagesMatrix = GetImageMatrix(trainingDirectory, imageNames, exampleImage, intruderCount);
 
         imageCols = exampleImage.Cols;
         imageRows = exampleImage.Rows;
@@ -166,7 +168,7 @@ Image<GreyScale> Eigenface::GetImage(const VectorXf & image) const
 // Returns (N^2 x M, K)-matrix in which each column is an image in directory
 // _imageNames - populated with the names of each image corresponding with each column
 // exampleImage - example image from the directory used to extract image info
-MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage) const
+MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage, int intruders) const
 {
     if(_imageNames.size() != 0)
     {
@@ -184,6 +186,8 @@ MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::strin
 
     std::vector<VectorXf> images;
     bool imageInfoSet = false;
+
+    int imageIndex = 0;
     while ((ent = readdir(dir)) != NULL)
     {
         if(!std::regex_match(ent->d_name, std::regex(R"(.*\.pgm$)")))
@@ -196,14 +200,19 @@ MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::strin
 
         // TODO: Remove images from training set (first 50 of problem B)
 
-        Image<GreyScale> currentTrainingImage(directory + filename);
-        images.push_back(currentTrainingImage.FlattenedVector());
-
-        if(!imageInfoSet)
+        if(imageIndex >= intruders)
         {
-            exampleImage = currentTrainingImage;
-            imageInfoSet = true;
+            Image<GreyScale> currentTrainingImage(directory + filename);
+            images.push_back(currentTrainingImage.FlattenedVector());
+
+            if(!imageInfoSet)
+            {
+                exampleImage = currentTrainingImage;
+                imageInfoSet = true;
+            }
         }
+
+        imageIndex++;
     }
 
     closedir (dir);
@@ -280,6 +289,7 @@ void Eigenface::OutputTrainingData(std::string outputFileName) const
 
     file << imageRows << " " << imageCols << "\n";
     file << imageRange << "\n";
+    file << intruderCount << "\n";
 
     std::cout << "        Writing image names..." << std::endl;
     file << imageNames.size() << "\n";
@@ -316,6 +326,7 @@ void Eigenface::ReadTrainingData(std::string inputFileName){
 
     infile >> imageRows >> imageCols;
     infile >> imageRange;
+    infile >> intruderCount;
 
     int tempRows, tempCols;
 
@@ -387,7 +398,7 @@ float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const Vec
 
 // Compares two image names (from Faces_FA_FB naming convention)
 // Returns true if the images are of the same person, false if not
-bool Eigenface::ImageNamesEqual(std::string name1, std::string name2) const{
+bool Eigenface::ImageNamesEqual(const std::string & name1, const std::string & name2){
     std::string delimiter = "_";
     std::string token1 = name1.substr(0, name1.find(delimiter));
     std::string token2 = name2.substr(0, name2.find(delimiter));

@@ -66,9 +66,9 @@ namespace ROC
     Input: min, max, step, vector of data points
     Generate ROC values (False Positive/False Negative) for each threshold value
     */
-    vector<MisclassificationData> GetROCValues(ThresholdRange tRange, vector<float> discriminants, vector<Data> data)
+    vector<MisclassificationData> GetROCValues(ThresholdRange tRange, vector<float> discriminants, vector<bool> label)
     {
-        if(discriminants.size() != data.size())
+        if(discriminants.size() != label.size())
         {
             throw std::invalid_argument("GetROCValues discriminants and data must be the same length!");
         }
@@ -83,11 +83,11 @@ namespace ROC
             MisclassificationData currentMisclass;
             for(unsigned int i = 0; i < discriminants.size(); i++)
             {
-                bool skin = discriminants[i] >= thresh;
-                if(skin && data[i].label == 0)
+                bool belongsToClass = discriminants[i] >= thresh;
+                if(belongsToClass && !label[i])
                 {
                     currentMisclass.falsePositives++;
-                } else if(!skin && data[i].label == 1)
+                } else if(!belongsToClass && label[i])
                 {
                     currentMisclass.falseNegatives++;
                 }

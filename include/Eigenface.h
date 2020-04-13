@@ -30,11 +30,14 @@ class Eigenface
 
         std::vector<std::string> imageNames;
 
+        // The first intruderCount images did not contribute to the model
+        int intruderCount;
+
         // Image information used for outputting images
         int imageRows, imageCols, imageRange;
 
         // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-        Eigenface(std::string modelName, std::string trainingDirectory);
+        Eigenface(std::string modelName, std::string trainingDirectory, int _intruderCount = 0);
 
         // Copy constructor
         Eigenface(const Eigenface &other);
@@ -68,7 +71,11 @@ class Eigenface
         // Returns (N^2 x M, K)-matrix in which each column is an image in directory
         // imageNames - populated with the names of each image corresponding with each column
         // exampleImage - example image from the directory used to extract image info
-        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage) const;
+        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage, int intruders = 0) const;
+
+        // Compares two image names (from Faces_FA_FB naming convention)
+        // Returns true if the images are of the same person, false if not
+        static bool ImageNamesEqual(const std::string & name1, const std::string & name2);
 
     private:
 
@@ -102,10 +109,6 @@ class Eigenface
         // eigenCount - number of eigenvectors considered in the calculation
             // Must be less than or equal to M
         float MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, float infoRatio) const;
-
-        // Compares two image names (from Faces_FA_FB naming convention)
-        // Returns true if the images are of the same person, false if not
-        bool ImageNamesEqual(std::string name1, std::string name2) const;
 };
 
 
