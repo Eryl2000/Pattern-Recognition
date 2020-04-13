@@ -70,6 +70,10 @@ class Eigenface
         // exampleImage - example image from the directory used to extract image info
         MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage) const;
 
+        // Compares two image names (from Faces_FA_FB naming convention)
+        // Returns true if the images are of the same person, false if not
+        bool ImageNamesEqual(std::string name1, std::string name2) const;
+        
     private:
 
         // Tranforms the vector to be in range [0, range]
@@ -102,10 +106,6 @@ class Eigenface
         // eigenCount - number of eigenvectors considered in the calculation
             // Must be less than or equal to M
         float MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, float infoRatio) const;
-
-        // Compares two image names (from Faces_FA_FB naming convention)
-        // Returns true if the images are of the same person, false if not
-        bool ImageNamesEqual(std::string name1, std::string name2) const;
 };
 
 

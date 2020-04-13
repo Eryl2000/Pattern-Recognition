@@ -5,6 +5,7 @@
 #include "MLEstimation.h"
 #include "Image.h"
 #include "Eigenface.h"
+#include "CMC.h"
 
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
 
@@ -16,11 +17,11 @@ int main(int argc, char *argv[])
     std::cout << "Project 3" << std::endl;
     Eigenface eigenface(trainedModelsPath + "model1.txt", "./Faces_FA_FB/fa_H/");
 
-    std::cout << "Outputting Average Face" << std::endl;
+    std::cout << "Outputting Average Face..." << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
     averageFace.WriteToFile(outputImagePath + "averageFace.pgm");
 
-    std::cout << "Outputting Eigenfaces" << std::endl;
+    std::cout << "Outputting Eigenfaces..." << std::endl;
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 10);
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
@@ -32,6 +33,22 @@ int main(int argc, char *argv[])
     {
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
+
+    float infoRatio = 80.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 90.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 95.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 5.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
 
     return 0;
 }
