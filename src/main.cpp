@@ -31,5 +31,9 @@ int main(int argc, char *argv[])
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
 
+    Image<GreyScale> reconstructedImage = eigenface.GetImage(VectorXf(eigenface.ReconstructImages(eigenface.eigenspaceTrainingValues.col(0), 100)));
+    reconstructedImage.WriteToFile(outputImagePath + "reconstructed.pgm");
+    std::cout << "Reconstructed image: " << eigenface.imageNames[0] << std::endl;
+
     return 0;
 }
