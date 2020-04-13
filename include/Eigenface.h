@@ -99,12 +99,6 @@ class Eigenface
             // Must be less than or equal to M
         float MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const;
 
-        // Returns the EuclideanDistance between the eigenspace representations of the two images
-        // eigenspaceImage - (M)-vector
-        // eigenCount - number of eigenvectors considered in the calculation
-            // Must be less than or equal to M
-        float EuclideanDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const;
-
         // Compares two image names (from Faces_FA_FB naming convention)
         // Returns true if the images are of the same person, false if not
         bool ImageNamesEqual(std::string name1, std::string name2) const;

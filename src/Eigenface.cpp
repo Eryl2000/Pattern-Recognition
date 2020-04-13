@@ -165,7 +165,7 @@ MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
     bool imageInfoSet = false;
     while ((ent = readdir(dir)) != NULL)
     {
-        if(!std::regex_match(ent->d_name, std::regex(".*\.pgm$")))
+        if(!std::regex_match(ent->d_name, std::regex(R"(.*\.pgm$)")))
         {
             continue;
         }
@@ -364,17 +364,6 @@ void Eigenface::ReadTrainingData(std::string inputFileName){
 // eigenCount - number of eigenvectors considered in the calculation
     // Must be less than or equal to M
 float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const
-{
-
-}
-
-
-// TODO: Remove function, based on reading closer ek is said to be the Mahalanobis Distance between test image and closest training image
-// Returns the EuclideanDistance between the eigenspace representations of the two images
-// eigenspaceImage - (M)-vector
-// eigenCount - number of eigenvectors considered in the calculation
-    // Must be less than or equal to M
-float Eigenface::EuclideanDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const
 {
 
 }
