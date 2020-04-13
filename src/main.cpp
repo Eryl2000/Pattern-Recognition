@@ -6,6 +6,8 @@
 #include "Image.h"
 #include "Eigenface.h"
 
+void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
+
 int main(int argc, char *argv[])
 {
     std::string outputImagePath("output_images/");
@@ -29,9 +31,17 @@ int main(int argc, char *argv[])
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
 
-    Image<GreyScale> reconstructedImage = eigenface.GetImage(VectorXf(eigenface.ReconstructImages(eigenface.eigenspaceTrainingValues.col(0), 100)));
+    return 0;
+}
+
+void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath)
+{
+    VectorXf reconstructedVector = eigenface.ReconstructImages(eigenface.eigenspaceTrainingValues.col(0), 100);
+    Image<GreyScale> reconstructedImage = eigenface.GetImage(reconstructedVector);
     reconstructedImage.WriteToFile(outputImagePath + "reconstructed.pgm");
     std::cout << "Reconstructed image: " << eigenface.imageNames[0] << std::endl;
 
-    return 0;
+    VectorXf originalImage = Image<GreyScale>("./Faces_FA_FB/fa_H/" + eigenface.imageNames[0]).FlattenedVector();
+
+    std::cout << "Reconstruction error: " << (reconstructedVector - originalImage).norm() << std::endl;
 }
