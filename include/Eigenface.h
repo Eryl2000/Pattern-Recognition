@@ -68,7 +68,7 @@ class Eigenface
         // Returns (N^2 x M, K)-matrix in which each column is an image in directory
         // imageNames - populated with the names of each image corresponding with each column
         // exampleImage - example image from the directory used to extract image info
-        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & imageNames, Image<GreyScale> & exampleImage) const;
+        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage) const;
 
     private:
 
@@ -101,13 +101,7 @@ class Eigenface
         // eigenspaceImage - (M)-vector
         // eigenCount - number of eigenvectors considered in the calculation
             // Must be less than or equal to M
-        float MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const;
-
-        // Returns the EuclideanDistance between the eigenspace representations of the two images
-        // eigenspaceImage - (M)-vector
-        // eigenCount - number of eigenvectors considered in the calculation
-            // Must be less than or equal to M
-        float EuclideanDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const;
+        float MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, float infoRatio) const;
 
         // Compares two image names (from Faces_FA_FB naming convention)
         // Returns true if the images are of the same person, false if not
