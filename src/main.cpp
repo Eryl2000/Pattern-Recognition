@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "Training intruder eigenfaces" << std::endl;
-    Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", "./Faces_FA_FB/fa_H/", 50);
+    const int intruderSubjectCount = 50;
+    Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", "./Faces_FA_FB/fa_H/", intruderSubjectCount);
 
     std::cout << "Generating ROC curve" << std::endl;
     GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces", "./Faces_FA_FB/fb_H/");
@@ -80,9 +81,14 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
     const int numThresholds = 100;
 
     std::vector<std::string> imageNames;
+
+    // not usefull, not need for image info (unless testing image is different from training for some reason)
     Image<GreyScale> exampleImage;
 
-    MatrixXf testingImages = eigenface.GetImageMatrix(testingImageDirectory, imageNames, exampleImage);
+    // should be 0, not usefull
+    int intuderCount;
+
+    MatrixXf testingImages = eigenface.GetImageMatrix(testingImageDirectory, imageNames, exampleImage, intuderCount);
     std::vector<float> errorValues = eigenface.GetDetectionError(testingImages, infoRatio);
 
     if(errorValues.size() != (unsigned int)testingImages.cols())
@@ -100,7 +106,7 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
     {
         std::unordered_set<std::string>::iterator intrusionMatch = std::find_if(intruderNames.begin(), intruderNames.end(), [&imageNames, i] (const std::string & intruderName)
         {
-            return Eigenface::ImageNamesEqual(imageNames[i], intruderName);
+            return Eigenface::IsSameSubject(imageNames[i], intruderName);
         });
         classification[i] = intrusionMatch == intruderNames.end();
     }

@@ -37,7 +37,7 @@ class Eigenface
         int imageRows, imageCols, imageRange;
 
         // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-        Eigenface(std::string modelName, std::string trainingDirectory, int _intruderCount = 0);
+        Eigenface(std::string modelName, std::string trainingDirectory, int intruderSubjects = 0);
 
         // Copy constructor
         Eigenface(const Eigenface &other);
@@ -69,13 +69,22 @@ class Eigenface
         Image<GreyScale> GetImage(const VectorXf & image) const;
 
         // Returns (N^2 x M, K)-matrix in which each column is an image in directory
-        // imageNames - populated with the names of each image corresponding with each column
+        // _imageNames - populated with the names of each image corresponding with each column
         // exampleImage - example image from the directory used to extract image info
-        MatrixXf GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage, int intruders = 0) const;
+        // intruders - number of intruder images at the start of the imageNames
+        // subjectIntruders - number of subjects to exclude from the set
+        MatrixXf GetImageMatrix(std::string directory,
+                                std::vector<std::string> & _imageNames,
+                                Image<GreyScale> & exampleImage,
+                                int & intruders,
+                                int subjectIntruders = 0) const;
 
         // Compares two image names (from Faces_FA_FB naming convention)
         // Returns true if the images are of the same person, false if not
-        static bool ImageNamesEqual(const std::string & name1, const std::string & name2);
+        static bool IsSameSubject(const std::string & name1, const std::string & name2);
+
+        // Returns the subject name identifier from the image name
+        static int SubjectID(const std::string & fileName);
 
     private:
 

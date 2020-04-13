@@ -17,9 +17,7 @@
 #include "Image.h"
 
 // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-// intruderCount is initialized, the value is only used if the model file cannot be found
-Eigenface::Eigenface(std::string modelName, std::string trainingDirectory, int _intruderCount)
-: intruderCount(_intruderCount)
+Eigenface::Eigenface(std::string modelName, std::string trainingDirectory, int intruderSubjects)
 {
     if(access(modelName.c_str(), F_OK) != -1){
         std::cout << "    Loading trained model from file..." << std::endl;
@@ -28,7 +26,7 @@ Eigenface::Eigenface(std::string modelName, std::string trainingDirectory, int _
         std::cout << "Loading training image files..." << std::endl;
 
         Image<GreyScale> exampleImage;
-        MatrixXf imagesMatrix = GetImageMatrix(trainingDirectory, imageNames, exampleImage, intruderCount);
+        MatrixXf imagesMatrix = GetImageMatrix(trainingDirectory, imageNames, exampleImage, intruderCount, intruderSubjects);
 
         imageCols = exampleImage.Cols;
         imageRows = exampleImage.Rows;
@@ -161,70 +159,87 @@ Image<GreyScale> Eigenface::GetImage(const VectorXf & image) const
 // Returns (N^2 x M, K)-matrix in which each column is an image in directory
 // _imageNames - populated with the names of each image corresponding with each column
 // exampleImage - example image from the directory used to extract image info
-MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage, int intruders) const
+// intruders - number of intruder images at the start of the imageNames
+// subjectIntruders - number of subjects to exclude from the set
+MatrixXf Eigenface::GetImageMatrix(std::string directory,
+                                   std::vector<std::string> & _imageNames,
+                                   Image<GreyScale> & exampleImage,
+                                   int & intruders,
+                                   int subjectIntruders) const
 {
     if(_imageNames.size() != 0)
     {
         throw std::invalid_argument("Eigenface::GetImageMatrix _imageNames must be empty when the function is called");
     }
 
+    // Get image names
     DIR *dir = opendir (directory.c_str());
     if (dir == NULL)
     {
         std::cerr << "Could not open training directory!" << std::endl;
-        MatrixXf ret(0, 0);
-        return ret;
+        return MatrixXf(0, 0);
     }
     struct dirent *ent;
-
-    std::vector<VectorXf> images;
-    bool imageInfoSet = false;
-
-    int imageIndex = 0;
     while ((ent = readdir(dir)) != NULL)
     {
-        if(!std::regex_match(ent->d_name, std::regex(R"(.*\.pgm$)")))
+        if(std::regex_match(ent->d_name, std::regex(R"(.*\.pgm$)")))
         {
-            continue;
+            std::string filename = std::string(ent->d_name);
+            _imageNames.push_back(filename.substr(0, filename.size() - 4));
         }
-
-        std::string filename = std::string(ent->d_name);
-        _imageNames.push_back(filename.substr(0, filename.size() - 4));
-
-        // TODO: Remove SUBJECTS from training set
-            // This is only removing the first 50 images
-
-        if(imageIndex >= intruders)
-        {
-            Image<GreyScale> currentTrainingImage(directory + filename);
-            images.push_back(currentTrainingImage.FlattenedVector());
-
-            if(!imageInfoSet)
-            {
-                exampleImage = currentTrainingImage;
-                imageInfoSet = true;
-            }
-        }
-
-        imageIndex++;
     }
 
     closedir (dir);
 
-    if(images.size() == 0)
+    if(_imageNames.size() == 0)
     {
         std::cerr << "No images were found in the provided training directory!" << std::endl;
-        MatrixXf ret(0, 0);
-        return ret;
+        return MatrixXf(0, 0);
     }
 
-    // TODO: sort images by filename, remove first 50 subjects
-        // Intruder count now refers to # of subjects, need "new" member that is the number of images
+    // Sort image names
+    std::sort(_imageNames.begin(), _imageNames.end());
 
-    MatrixXf imagesMatrix(images[0].size(), images.size());
-    for(unsigned int i = 0; i < images.size(); i++)
+    int currentIntruderSubjectCount = 1;
+    // Need to set to first subject ID if subjects do not start with 1
+    int currentIntruderSubject = 1;
+    intruders = -1;
+    
+    // Terminates when intruders points to the first non-intruder image
+    while(currentIntruderSubjectCount <= subjectIntruders)
     {
-        imagesMatrix.col(i) = images[i];
+        intruders++;
+
+        int currentSubjectID = SubjectID(_imageNames[intruders]);
+
+        if(currentSubjectID > currentIntruderSubject)
+        {
+            currentIntruderSubject = currentSubjectID;
+            currentIntruderSubjectCount++;
+
+        } else if(currentSubjectID < currentIntruderSubject)
+        {
+            std::cerr << "Eigenface GetImageMatrix subjects are not sorted correctly! (subject ID decreased when traversing)" << std::endl;
+            return MatrixXf(0, 0);
+        }
+    }
+
+    if(subjectIntruders == 0)
+    {
+        intruders = 0;
+    }
+
+    // Gets first exampleImage in order to get the matrix row size
+    exampleImage = Image<GreyScale>(directory + _imageNames[intruders] + ".pgm");
+    VectorXf exampleImageVector = exampleImage.FlattenedVector();
+    MatrixXf imagesMatrix(exampleImageVector.size(), _imageNames.size() - intruders);
+    imagesMatrix.col(intruders) = exampleImageVector;
+
+    // Opens each image and assigns it to each column
+    for(unsigned int i = intruders + 1; i < _imageNames.size(); i++)
+    {
+        Image<GreyScale> currentTrainingImage(directory + _imageNames[i] + ".pgm");
+        imagesMatrix.col(i - intruders) = currentTrainingImage.FlattenedVector();
     }
     return imagesMatrix;
 }
@@ -395,9 +410,13 @@ float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const Vec
 
 // Compares two image names (from Faces_FA_FB naming convention)
 // Returns true if the images are of the same person, false if not
-bool Eigenface::ImageNamesEqual(const std::string & name1, const std::string & name2){
+bool Eigenface::IsSameSubject(const std::string & name1, const std::string & name2){
+    return SubjectID(name1) == SubjectID(name2);
+}
+
+// Returns the subject name identifier from the image name
+int Eigenface::SubjectID(const std::string & fileName)
+{
     std::string delimiter = "_";
-    std::string token1 = name1.substr(0, name1.find(delimiter));
-    std::string token2 = name2.substr(0, name2.find(delimiter));
-    return token1 == token2;
+    return std::stoi(fileName.substr(0, fileName.find(delimiter)));
 }
