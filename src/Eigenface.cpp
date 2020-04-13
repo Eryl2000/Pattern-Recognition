@@ -11,31 +11,53 @@
 #include <algorithm>
 #include <numeric>
 #include <regex>
+#include <unistd.h>
 
 #include "Image.h"
 
 // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-Eigenface::Eigenface(std::string trainingDirectory)
+Eigenface::Eigenface(std::string modelName, std::string trainingDirectory)
 {
-    std::cout << "Loading training image files..." << std::endl;
-    MatrixXf imagesMatrix = GetTrainingData(trainingDirectory);
-    if(imagesMatrix.rows() == 0 && imagesMatrix.cols() == 0){
-        return;
+    if(access(modelName.c_str(), F_OK) != -1){
+        std::cout << "    Loading trained model from file..." << std::endl;
+        ReadTrainingData(modelName);
+    } else{
+        std::cout << "Loading training image files..." << std::endl;
+        MatrixXf imagesMatrix = GetTrainingData(trainingDirectory);
+        if(imagesMatrix.rows() == 0 && imagesMatrix.cols() == 0){
+            return;
+        }
+
+        std::cout << "Training Eigenfaces..." << std::endl;
+
+        std::cout << "    Finding average face..." << std::endl;
+        averageFace = GetAverageFace(imagesMatrix);
+
+        std::cout << "    Normalizing images..." << std::endl;
+        MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
+
+        std::cout << "    Finding eigenvectors..." << std::endl;
+        SetEigenvaluesEigenvectors(normalizedImages);
+
+        std::cout << "    Computing eigenspace representations for each training image..." << std::endl;
+        eigenspaceTrainingValues = ComputeEigenSpaceValues(normalizedImages);
+
+        std::cout << "    Saving trained model to file..." << std::endl;
+        OutputTrainingData(modelName);
     }
+}
 
-    std::cout << "Training Eigenfaces..." << std::endl;
 
-    std::cout << "    Finding average face..." << std::endl;
-    averageFace = GetAverageFace(imagesMatrix);
-
-    std::cout << "    Normalizing images..." << std::endl;
-    MatrixXf normalizedImages = NormalizeImages(imagesMatrix);
-
-    std::cout << "    Finding eigenvectors..." << std::endl;
-    SetEigenvaluesEigenvectors(normalizedImages);
-
-    std::cout << "    Computing eigenspace representations for each training image..." << std::endl;
-    eigenspaceTrainingValues = ComputeEigenSpaceValues(normalizedImages);
+// Copy constructor
+Eigenface::Eigenface(const Eigenface &other){
+    averageFace = other.averageFace;
+    eigenfaces = other.eigenfaces;
+    eigenvalues = other.eigenvalues;
+    eigenspaceTrainingValues = other.eigenspaceTrainingValues;
+    imageNames = other.imageNames;
+    imageRows = other.imageRows;
+    imageCols = other.imageCols;
+    imageRange = other.imageRange;
 }
 
 
@@ -133,7 +155,7 @@ MatrixXf Eigenface::GetTrainingData(std::string trainingDirectory)
         }
 
         std::string filename = std::string(ent->d_name);
-        imageNames.push_back(filename);
+        imageNames.push_back(filename.substr(0, filename.size() - 4));
         
         // TODO: Sort/Label images by their ID
         // TODO: Remove images from training set (first 50 of problem B)
@@ -228,7 +250,106 @@ MatrixXf Eigenface::ReconstructImages(const MatrixXf &eigenspaceValues, int eige
 // Outputs the averageFace, eigenFaces, and the eigenspaceTrainingValues to a file
 void Eigenface::OutputTrainingData(std::string outputFileName) const
 {
+    std::ofstream file(outputFileName);
+    if(!file.is_open()){
+        std::cout << "Can't open file: " << outputFileName << std::endl;
+        exit(1);
+    }
 
+    file << imageRows << " " << imageCols << "\n";
+    file << imageRange << "\n";
+
+    std::cout << "        Writing image names..." << std::endl;
+    file << imageNames.size() << "\n";
+    for(unsigned int i = 0; i < imageNames.size(); ++i){
+        file << imageNames[i] << "\n";
+    }
+    file << "\n";
+
+    std::cout << "        Writing average face..." << std::endl;
+    file << averageFace.size() << "\n";
+    file << averageFace << "\n\n";
+
+    std::cout << "        Writing eigenvalues..." << std::endl;
+    file << eigenvalues.size() << "\n";
+    file << eigenvalues << "\n\n";
+
+    std::cout << "        Writing eigenfaces..." << std::endl;
+    file << eigenfaces.rows() << " " << eigenfaces.cols() << "\n";
+    file << eigenfaces << "\n\n";
+
+    std::cout << "        Writing eigenspace training values..." << std::endl;
+    file << eigenspaceTrainingValues.rows() << " " << eigenspaceTrainingValues.cols() << "\n";
+    file << eigenspaceTrainingValues << "\n\n";
+    
+    file.close();
+}
+
+
+// Reads the averageFace, eigenFaces, and the eigenspaceTrainingValues from a file
+void Eigenface::ReadTrainingData(std::string inputFileName){
+    // Read numbers from file into buffer.
+    std::ifstream infile;
+    infile.open(inputFileName);
+
+    infile >> imageRows >> imageCols;
+    infile >> imageRange;
+
+    int tempRows, tempCols;
+
+    std::cout << "        Reading image names..." << std::endl;
+    infile >> tempRows;
+    imageNames.reserve(tempRows);
+    std::string line;
+    getline(infile, line);
+    for(int i = 0; i < tempRows; ++i){
+        getline(infile, line);
+        imageNames.push_back(line);
+    }
+
+    std::cout << "        Reading average face..." << std::endl;
+    infile >> tempRows;
+    averageFace.resize(tempRows);
+    for(int i = 0; i < tempRows; ++i){
+        float cur;
+        infile >> cur;
+        averageFace(i) = cur;
+    }
+
+    std::cout << "        Reading eigenvalues..." << std::endl;
+    infile >> tempRows;
+    eigenvalues.resize(tempRows);
+    for(int i = 0; i < tempRows; ++i){
+        float cur;
+        infile >> cur;
+        eigenvalues(i) = cur;
+    }
+
+    std::cout << "        Reading eigenfaces..." << std::endl;
+    infile >> tempRows >> tempCols;
+    eigenfaces.resize(tempRows, tempCols);
+    for(int i = 0; i < tempRows * tempCols; ++i){
+        float cur;
+        infile >> cur;
+        eigenfaces(i / tempCols, i % tempCols) = cur;
+    }
+
+    std::cout << "        Reading eigenspace training values..." << std::endl;
+    infile >> tempRows >> tempCols;
+    eigenspaceTrainingValues.resize(tempRows, tempCols);
+    for(int i = 0; i < tempRows * tempCols; ++i){
+        float cur;
+        infile >> cur;
+        eigenspaceTrainingValues(i / tempCols, i % tempCols) = cur;
+    }
+
+    //std::cout << averageFace.rows() << "   " << eigenfaces.rows() << " " << eigenfaces.cols() << "    " << eigenspaceTrainingValues.rows() << " " << eigenspaceTrainingValues.cols() << std::endl;
+    //std::cout << imageNames[1202] << " " << imageNames[1203] << std::endl;
+    //std::cout << averageFace(2878) << " " << averageFace(2879) <<std::endl;
+    //std::cout << eigenvalues(1202) << " " << eigenvalues(1202) <<std::endl;
+    //std::cout << eigenfaces(2879, 1202) << " " << eigenfaces(2879, 1203) << std::endl;
+    //std::cout << eigenspaceTrainingValues(1203, 1202) << " " << eigenspaceTrainingValues(1203, 1203) << std::endl;
+    infile.close();
 }
 
 

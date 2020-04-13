@@ -9,9 +9,11 @@
 int main(int argc, char *argv[])
 {
     std::string outputImagePath("output_images/");
+    std::string trainedModelsPath("trained_models/");
 
     std::cout << "Project 3" << std::endl;
-    Eigenface eigenface("./Faces_FA_FB/fa_H/");
+    Eigenface eigenface(trainedModelsPath + "model1.txt", "./Faces_FA_FB/fa_H/");
+
     std::cout << "Outputting Average Face" << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
     averageFace.WriteToFile(outputImagePath + "averageFace.pgm");

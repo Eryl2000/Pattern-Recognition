@@ -33,7 +33,10 @@ class Eigenface
         int imageRows, imageCols, imageRange;
 
         // Initializes the averageFace, eigenfaces, eigenvalues, eigenspaceTrainingValues
-        Eigenface(std::string trainingDirectory);
+        Eigenface(std::string modelName, std::string trainingDirectory);
+
+        // Copy constructor
+        Eigenface(const Eigenface &other);
 
         // testingImages - (N^2 x K)-matrix of testing images
         // infoRatio - percent information perserved / percent eigenvalues used
@@ -83,6 +86,9 @@ class Eigenface
 
         // Outputs the averageFace, eigenFaces, and the eigenspaceTrainingValues to a file
         void OutputTrainingData(std::string outputFileName) const;
+
+        // Reads the averageFace, eigenFaces, and the eigenspaceTrainingValues from a file
+        void ReadTrainingData(std::string inputFileName);
 
         // Returns the MahalanobisDistance between the eigenspace representations of the two images
         // eigenspaceImage - (M)-vector
