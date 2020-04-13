@@ -7,6 +7,7 @@
 #include "MLEstimation.h"
 #include "Image.h"
 #include "Eigenface.h"
+#include "CMC.h"
 
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
 void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::string testingImageDirectory);
@@ -19,11 +20,11 @@ int main(int argc, char *argv[])
     std::cout << "Project 3" << std::endl;
     Eigenface eigenface(trainedModelsPath + "model1.txt", "./Faces_FA_FB/fa_H/");
 
-    std::cout << "Outputting Average Face" << std::endl;
+    std::cout << "Outputting Average Face..." << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
     averageFace.WriteToFile(outputImagePath + "averageFace.pgm");
 
-    std::cout << "Outputting Eigenfaces" << std::endl;
+    std::cout << "Outputting Eigenfaces..." << std::endl;
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 10);
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
@@ -36,8 +37,27 @@ int main(int argc, char *argv[])
         eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
     }
 
+    std::cout << "Training intruder eigenfaces" << std::endl;
     Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", "./Faces_FA_FB/fa_H/", 50);
+
+    std::cout << "Generating ROC curve" << std::endl;
     GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces", "./Faces_FA_FB/fb_H/");
+
+    float infoRatio = 80.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 90.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 95.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
+
+    infoRatio = 5.0f;
+    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
+    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
 
     return 0;
 }
@@ -62,7 +82,6 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
     std::vector<std::string> imageNames;
     Image<GreyScale> exampleImage;
 
-    // No guarentee the matrix is in the same order as the training matrix
     MatrixXf testingImages = eigenface.GetImageMatrix(testingImageDirectory, imageNames, exampleImage);
     std::vector<float> errorValues = eigenface.GetDetectionError(testingImages, infoRatio);
 
@@ -87,5 +106,7 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
     }
 
     std::vector<MisclassificationData> rocValues = ROC::GetROCValues(thresh, errorValues, classification);
+
+    // TODO: Plot normalized ROC data (divide by total postives/negatives)
     ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"});
 }

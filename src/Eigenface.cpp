@@ -73,6 +73,7 @@ Eigenface::Eigenface(const Eigenface &other){
 // testingImages - (N^2 x K)-matrix of testing images
 // infoRatio - percent information perserved / percent eigenvalues used
 // Returns the image index and error of the closest topMatches matches for each column of testingImages
+// Returned vector's first index corresponds to the testing image index, the second with the training image index
 std::vector<std::vector<EigenfaceError>> Eigenface::GetClosestMatches(const MatrixXf &testingImages, int topMatches, float infoRatio) const
 {
     // Subtract mean face
@@ -83,27 +84,19 @@ std::vector<std::vector<EigenfaceError>> Eigenface::GetClosestMatches(const Matr
     std::vector<std::vector<EigenfaceError>> topMatchesAllImages(testingImages.cols());
     for(int i = 0; i < testingEigenspaceValues.cols(); i++)
     {
-        std::vector<float> currentTopMatches(eigenspaceTrainingValues.cols());
         VectorXf currentTestingEigenspaceValues = testingEigenspaceValues.col(i);
-
+        std::vector<EigenfaceError> currentError;
+        currentError.reserve(eigenspaceTrainingValues.cols());
         // For every training eigenspace representation
         for(int j = 0; j < eigenspaceTrainingValues.cols(); j++)
         {
             VectorXf currentTrainingEigenspaceValues = eigenspaceTrainingValues.col(j);
 
             // Compute Mahalanobis distance between eigenspace coefficients
-            currentTopMatches[j] = MahalanobisDistance(currentTestingEigenspaceValues, currentTrainingEigenspaceValues, infoRatio);
+            float error = MahalanobisDistance(currentTestingEigenspaceValues, currentTrainingEigenspaceValues, infoRatio);
+            currentError.push_back(EigenfaceError(j, error));
         }
-
-        // Find the top N faces with the lowest distance
-        std::vector<EigenfaceError> currentError(currentTopMatches.size());
-        for(unsigned int j = 0; j < currentError.size(); j++)
-        {
-            currentError[j] = EigenfaceError(i);
-        }
-
         std::sort(currentError.begin(), currentError.end());
-
         topMatchesAllImages[i] = std::vector<EigenfaceError>(currentError.begin(), currentError.begin() + topMatches);
     }
 
@@ -198,7 +191,8 @@ MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::strin
         std::string filename = std::string(ent->d_name);
         _imageNames.push_back(filename.substr(0, filename.size() - 4));
 
-        // TODO: Remove images from training set (first 50 of problem B)
+        // TODO: Remove SUBJECTS from training set
+            // This is only removing the first 50 images
 
         if(imageIndex >= intruders)
         {
@@ -223,6 +217,9 @@ MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::strin
         MatrixXf ret(0, 0);
         return ret;
     }
+
+    // TODO: sort images by filename, remove first 50 subjects
+        // Intruder count now refers to # of subjects, need "new" member that is the number of images
 
     MatrixXf imagesMatrix(images[0].size(), images.size());
     for(unsigned int i = 0; i < images.size(); i++)
@@ -258,7 +255,7 @@ void Eigenface::SetEigenvaluesEigenvectors(const MatrixXf &normalizedImages)
     MatrixXf dotNormalized = normalizedImages.transpose() * normalizedImages;
     EigenSolver<MatrixXf> solver(dotNormalized);
     eigenvalues = solver.eigenvalues().real();
-    eigenfaces = (normalizedImages * solver.eigenvectors().real()).colwise().normalized();
+    eigenfaces = normalizedImages * solver.eigenvectors().real();
 }
 
 
