@@ -114,7 +114,13 @@ std::vector<std::vector<EigenfaceError>> Eigenface::GetClosestMatches(const Matr
 // Returns the error/distance between the reconstructed and normalized image for each column of testingImages
 std::vector<float> Eigenface::GetDetectionError(const MatrixXf &testingImages, float infoRatio) const
 {
-
+    std::vector<float> ret;
+    ret.reserve(testingImages.cols());
+    std::vector<std::vector<EigenfaceError>> matches = GetClosestMatches(testingImages, 1, infoRatio);
+    for(int i = 0; i < testingImages.cols(); ++i){
+        ret.push_back(matches[i][0].error);
+    }
+    return ret;
 }
 
 
@@ -158,13 +164,13 @@ Image<GreyScale> Eigenface::GetImage(const VectorXf & image) const
 
 
 // Returns (N^2 x M, K)-matrix in which each column is an image in directory
-// imageNames - populated with the names of each image corresponding with each column
+// _imageNames - populated with the names of each image corresponding with each column
 // exampleImage - example image from the directory used to extract image info
-MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & imageNames, Image<GreyScale> & exampleImage) const
+MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::string> & _imageNames, Image<GreyScale> & exampleImage) const
 {
-    if(imageNames.size() != 0)
+    if(_imageNames.size() != 0)
     {
-        throw std::invalid_argument("Eigenface::GetImageMatrix imageNames must be empty when the function is called");
+        throw std::invalid_argument("Eigenface::GetImageMatrix _imageNames must be empty when the function is called");
     }
 
     DIR *dir = opendir (directory.c_str());
@@ -186,12 +192,9 @@ MatrixXf Eigenface::GetImageMatrix(std::string directory, std::vector<std::strin
         }
 
         std::string filename = std::string(ent->d_name);
-        imageNames.push_back(filename.substr(0, filename.size() - 4));
-        
-        // TODO: Sort/Label images by their ID
-        // TODO: Remove images from training set (first 50 of problem B)
+        _imageNames.push_back(filename.substr(0, filename.size() - 4));
 
-        //std::cout << "Opening: " << ent->d_name << std::endl;
+        // TODO: Remove images from training set (first 50 of problem B)
 
         Image<GreyScale> currentTrainingImage(directory + filename);
         images.push_back(currentTrainingImage.FlattenedVector());
@@ -362,12 +365,6 @@ void Eigenface::ReadTrainingData(std::string inputFileName){
         eigenspaceTrainingValues(i / tempCols, i % tempCols) = cur;
     }
 
-    //std::cout << averageFace.rows() << "   " << eigenfaces.rows() << " " << eigenfaces.cols() << "    " << eigenspaceTrainingValues.rows() << " " << eigenspaceTrainingValues.cols() << std::endl;
-    //std::cout << imageNames[1202] << " " << imageNames[1203] << std::endl;
-    //std::cout << averageFace(2878) << " " << averageFace(2879) <<std::endl;
-    //std::cout << eigenvalues(1202) << " " << eigenvalues(1202) <<std::endl;
-    //std::cout << eigenfaces(2879, 1202) << " " << eigenfaces(2879, 1203) << std::endl;
-    //std::cout << eigenspaceTrainingValues(1203, 1202) << " " << eigenspaceTrainingValues(1203, 1203) << std::endl;
     infile.close();
 }
 
@@ -376,9 +373,15 @@ void Eigenface::ReadTrainingData(std::string inputFileName){
 // eigenspaceImage - (M)-vector
 // eigenCount - number of eigenvectors considered in the calculation
     // Must be less than or equal to M
-float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, int eigenCount) const
+float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, float infoRatio) const
 {
-
+    int eigenCount = eigenfaces.cols() * (infoRatio / 100.0f);
+    float total = 0;
+    for(int i = 0; i < eigenCount; ++i){
+        float diff = eigenspaceImage1(i) - eigenspaceImage2(i);
+        total += diff * diff / eigenvalues(i);
+    }
+    return total;
 }
 
 
