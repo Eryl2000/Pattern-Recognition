@@ -1,3 +1,5 @@
+// TODO: Convert to namespace and create BoxMuller.cpp
+
 #ifndef BOX_MULLER_H_
 #define BOX_MULLER_H_
 
