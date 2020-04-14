@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_set>
 #include <algorithm>
+#include <utility>
 #include "Plot.h"
 #include "ROC.h"
 #include "MLEstimation.h"
@@ -70,16 +71,22 @@ void ExperimentA(std::string trainDirectory, std::string testDirectory, std::str
 
     //CMC data
     std::cout << "Generating CMC data..." << std::endl;
-    std::vector<float> infoRatios = {80.0f, 90.0f, 95.0f};
-    std::vector<std::vector<float>> dataPoints;
+    const std::vector<float> infoRatios = {80.0f, 90.0f, 95.0f};
+    std::vector<std::vector<std::pair<float, float>>> dataPoints;
     dataPoints.reserve(infoRatios.size());
     for(unsigned int i = 0; i < infoRatios.size(); ++i){
         std::cout << "    Generating data for " << infoRatios[i] << "% infoRatio..." << std::endl;
-        dataPoints.push_back(CMC::GenerateCMC(testDirectory, eigenface, infoRatios[i]));
+        dataPoints.push_back(CMC::ConvertToPoints(CMC::GenerateCMC(testDirectory, eigenface, infoRatios[i])));
+    }
+
+    std::vector<std::string> infoRatioStrings(infoRatios.size());
+    for(unsigned int i = 0; i < infoRatioStrings.size(); i++)
+    {
+        infoRatioStrings[i] = std::to_string(infoRatios[i]) + "%";
     }
 
     std::cout << "Plotting combined CMC curve..." << std::endl;
-    //TODO: Plot dataPoints on the same graph
+    Plot::PlotPairs("Eigenspace CMC", {"N", "Accuracy"}, infoRatioStrings, dataPoints);
 
     std::cout << std::endl;
 }
@@ -137,7 +144,6 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
 
     std::vector<MisclassificationData> rocValues = ROC::GetROCValues(thresh, errorValues, classification);
 
-    // TODO: Plot normalized ROC data (divide by total postives/negatives)
     std::cout << "Positive count: " << positiveCount << ", Negative count: " << negativeCount << std::endl;
     ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"}, {positiveCount, negativeCount}, {false, true}, true);
 }
