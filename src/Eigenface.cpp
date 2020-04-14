@@ -139,6 +139,19 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
     return eigenfaceImages;
 }
 
+// Returns the number of eigenvalues necessary to capture infoRatio amount of the eigenvector information
+// infoRatio is in the range [0, 100]
+int Eigenface::EigenCount(float infoRatio) const{
+    int k = 0;
+    float totalEigenvalues = eigenvalues.sum();
+    float sum = 0;
+    while(sum / totalEigenvalues < (infoRatio / 100.0f)){
+        sum += eigenvalues(k);
+        k++;
+    }
+    return k;
+}
+
 
 // eigenspaceValues - (M x M, K, 1)-matrix
 // infoRatio - percent information perserved / percent eigenvalues used
@@ -146,7 +159,7 @@ std::vector<Image<GreyScale>> Eigenface::GetEigenfaceImages(int start, int end) 
 // Reconstructs the columns of eigenspaceValues using the first eigenCount eigenfaces
 MatrixXf Eigenface::ReconstructImages(const MatrixXf &eigenspaceValues, float infoRatio) const
 {
-    int eigenCount = eigenfaces.cols() * (infoRatio / 100.0f);
+    int eigenCount = EigenCount(infoRatio);
     return (eigenfaces.block(0, 0, eigenfaces.rows(), eigenCount) * eigenspaceValues.block(0, 0, eigenCount, eigenspaceValues.cols())).colwise() + averageFace;
 }
 
@@ -398,7 +411,7 @@ void Eigenface::ReadTrainingData(std::string inputFileName){
     // Must be less than or equal to M
 float Eigenface::MahalanobisDistance(const VectorXf &eigenspaceImage1, const VectorXf &eigenspaceImage2, float infoRatio) const
 {
-    int eigenCount = eigenfaces.cols() * (infoRatio / 100.0f);
+    int eigenCount = EigenCount(infoRatio);
     float total = 0;
     for(int i = 0; i < eigenCount; ++i){
         float diff = eigenspaceImage1(i) - eigenspaceImage2(i);

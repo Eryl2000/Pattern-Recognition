@@ -42,6 +42,9 @@ class Eigenface
         // Copy constructor
         Eigenface(const Eigenface &other);
 
+        // Returns the number of eigenvalues necessary to capture infoRatio amount of the eigenvector information
+        int EigenCount(float infoRatio) const;
+
         // testingImages - (N^2 x K)-matrix of testing images
         // infoRatio - percent information perserved / percent eigenvalues used
         // Returns the image index and error of the closest topMatches matches for each column of testingImages
