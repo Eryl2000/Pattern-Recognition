@@ -13,6 +13,7 @@
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
 void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::string testingImageDirectory);
 void ExperimentA(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImagePath);
+void ExperimentB(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImagePath);
 
 int main(int argc, char *argv[])
 {
@@ -23,22 +24,14 @@ int main(int argc, char *argv[])
     std::cout << "Project 3" << std::endl;
     
     std::cout << "Part A" << std::endl;
-    ExperimentA(inputImagePath + "fa_H/", inputImagePath + "fb_H/", trainedModelsPath + "model1.txt", outputImagePath);
-    
-    std::cout << "Part C" << std::endl;
-    ExperimentA(inputImagePath + "fa_L/", inputImagePath + "fb_L/", trainedModelsPath + "model2.txt", outputImagePath);
-
-
-
-
+    ExperimentA(inputImagePath + "fa_H/", inputImagePath + "fb_H/", trainedModelsPath + "modela.txt", outputImagePath);
 
     std::cout << "Part B" << std::endl;
-    std::cout << "Training intruder eigenfaces" << std::endl;
-    const int intruderSubjectCount = 50;
-    Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", inputImagePath + "fa_H/", intruderSubjectCount);
-
-    std::cout << "Generating ROC curve" << std::endl;
-    GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces", inputImagePath + "fb_H/");
+    ExperimentB(inputImagePath + "fa_H/", inputImagePath + "fb_H/", trainedModelsPath + "modelb.txt", outputImagePath);
+    
+    std::cout << "Part C" << std::endl;
+    ExperimentA(inputImagePath + "fa_L/", inputImagePath + "fb_L/", trainedModelsPath + "modelca.txt", outputImagePath);
+    ExperimentB(inputImagePath + "fa_L/", inputImagePath + "fb_L/", trainedModelsPath + "modelcb.txt", outputImagePath);
 
     return 0;
 }
@@ -86,7 +79,7 @@ void ExperimentA(std::string trainDirectory, std::string testDirectory, std::str
     }
 
     std::cout << "Plotting combined CMC curve..." << std::endl;
-    Plot::PlotPairs("Eigenspace CMC", {"N", "Accuracy"}, infoRatioStrings, dataPoints);
+    Plot::PlotPairs("Eigenspace CMC" + suffix, {"N", "Accuracy"}, infoRatioStrings, dataPoints);
 
     std::cout << std::endl;
 }
@@ -146,4 +139,16 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
 
     std::cout << "Positive count: " << positiveCount << ", Negative count: " << negativeCount << std::endl;
     ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"}, {positiveCount, negativeCount}, {false, true}, true);
+}
+
+void ExperimentB(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImagePath)
+{
+    std::string suffix = "_" + trainDirectory.substr(trainDirectory.length() - 2, 1);
+
+    std::cout << "Training intruder eigenfaces" << std::endl;
+    const int intruderSubjectCount = 50;
+    Eigenface eigenfaceIntruder(modelPath, trainDirectory, intruderSubjectCount);
+
+    std::cout << "Generating ROC curve" << std::endl;
+    GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces" + suffix, testDirectory);
 }
