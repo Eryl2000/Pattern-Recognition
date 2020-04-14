@@ -1,9 +1,11 @@
 #ifndef CMC_H_
 #define CMC_H_
 
+#include <vector>
+
 namespace CMC{
 
-void GenerateCMC(std::string testingImagesDirectory, const Eigenface &eigenface, float infoRatio);
+std::vector<float> GenerateCMC(std::string testingImagesDirectory, const Eigenface &eigenface, float infoRatio);
 
 }
 
