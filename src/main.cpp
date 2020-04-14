@@ -79,7 +79,7 @@ void ExperimentA(std::string trainDirectory, std::string testDirectory, std::str
     }
 
     std::cout << "Plotting combined CMC curve..." << std::endl;
-    Plot::PlotPairs("Eigenspace CMC" + suffix, {"N", "Accuracy"}, infoRatioStrings, dataPoints);
+    Plot::PlotPairs("Eigenspace CMC" + suffix, {"N", "Accuracy"}, infoRatioStrings, dataPoints, "lines", true);
 
     std::cout << std::endl;
 }
