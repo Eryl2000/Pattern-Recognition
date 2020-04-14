@@ -11,56 +11,77 @@
 
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
 void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::string testingImageDirectory);
+void ExperimentA(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImagePath);
 
 int main(int argc, char *argv[])
 {
-    std::string outputImagePath("output_images/");
-    std::string trainedModelsPath("trained_models/");
+    const std::string inputImagePath("Faces_FA_FB/");
+    const std::string outputImagePath("output_images/");
+    const std::string trainedModelsPath("trained_models/");
 
     std::cout << "Project 3" << std::endl;
-    Eigenface eigenface(trainedModelsPath + "model1.txt", "./Faces_FA_FB/fa_H/");
+    
+    std::cout << "Part A" << std::endl;
+    ExperimentA(inputImagePath + "fa_H/", inputImagePath + "fb_H/", trainedModelsPath + "model1.txt", outputImagePath);
+    
+    std::cout << "Part C" << std::endl;
+    ExperimentA(inputImagePath + "fa_L/", inputImagePath + "fb_L/", trainedModelsPath + "model2.txt", outputImagePath);
 
+
+
+
+
+    std::cout << "Part B" << std::endl;
+    std::cout << "Training intruder eigenfaces" << std::endl;
+    const int intruderSubjectCount = 50;
+    Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", inputImagePath + "fa_H/", intruderSubjectCount);
+
+    std::cout << "Generating ROC curve" << std::endl;
+    GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces", inputImagePath + "fb_H/");
+
+    return 0;
+}
+
+void ExperimentA(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImageDirectory){
+    std::string suffix = "_" + trainDirectory.substr(trainDirectory.length() - 2, 1);
+
+    //Create model
+    Eigenface eigenface(modelPath, trainDirectory);
+
+    //Average face
     std::cout << "Outputting Average Face..." << std::endl;
     Image<GreyScale> averageFace = eigenface.GetAverageImage();
-    averageFace.WriteToFile(outputImagePath + "averageFace.pgm");
+    averageFace.WriteToFile(outputImageDirectory + "averageFace" + suffix + ".pgm");
 
+    //Highest eigenfaces
     std::cout << "Outputting Eigenfaces..." << std::endl;
     std::vector<Image<GreyScale>> eigenFaces = eigenface.GetEigenfaceImages(0, 10);
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_good" + std::to_string(i) + ".pgm"));
+        eigenFaces[i].WriteToFile(outputImageDirectory + "eigenface_good" + std::to_string(i) + suffix + ".pgm");
     }
 
+    //Lowest eigenfaces
     eigenFaces = eigenface.GetEigenfaceImages(eigenface.eigenfaces.cols() - 10, eigenface.eigenfaces.cols());
     for(unsigned int i = 0; i < eigenFaces.size(); i++)
     {
-        eigenFaces[i].WriteToFile(outputImagePath + std::string("eigenface_bad" + std::to_string(i) + ".pgm"));
+        eigenFaces[i].WriteToFile(outputImageDirectory + "eigenface_bad" + std::to_string(i) + suffix + ".pgm");
     }
 
-    std::cout << "Training intruder eigenfaces" << std::endl;
-    const int intruderSubjectCount = 50;
-    Eigenface eigenfaceIntruder(trainedModelsPath + "modelb.txt", "./Faces_FA_FB/fa_H/", intruderSubjectCount);
+    //CMC data
+    std::cout << "Generating CMC data..." << std::endl;
+    std::vector<float> infoRatios = {80.0f, 90.0f, 95.0f};
+    std::vector<std::vector<float>> dataPoints;
+    dataPoints.reserve(infoRatios.size());
+    for(unsigned int i = 0; i < infoRatios.size(); ++i){
+        std::cout << "    Generating data for " << infoRatios[i] << "% infoRatio..." << std::endl;
+        dataPoints.push_back(CMC::GenerateCMC(testDirectory, eigenface, infoRatios[i]));
+    }
 
-    std::cout << "Generating ROC curve" << std::endl;
-    GenerateROCCurve(eigenfaceIntruder, "ROC Eigenfaces", "./Faces_FA_FB/fb_H/");
+    std::cout << "Plotting combined CMC curve..." << std::endl;
+    //TODO: Plot dataPoints on the same graph
 
-    float infoRatio = 80.0f;
-    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
-    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
-
-    infoRatio = 90.0f;
-    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
-    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
-
-    infoRatio = 95.0f;
-    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
-    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
-
-    infoRatio = 5.0f;
-    std::cout << "Generating CMC plot for " << infoRatio << "% infoRatio..." << std::endl;
-    CMC::GenerateCMC("./Faces_FA_FB/fb_H/", eigenface, infoRatio);
-
-    return 0;
+    std::cout << std::endl;
 }
 
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath)
