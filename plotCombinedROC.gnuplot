@@ -1,4 +1,4 @@
-set title 'ROC Eigenfaces_HL' font ',20'
+set title 'ROC Eigenfaces_H_L' font ',20'
 set xlabel 'False Positives'
 set ylabel 'True Positives'
 set grid xtics lt 0 lw 1 lc rgb '#bbbbbb'

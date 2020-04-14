@@ -79,7 +79,7 @@ void ExperimentA(std::string trainDirectory, std::string testDirectory, std::str
     }
 
     std::cout << "Plotting combined CMC curve..." << std::endl;
-    Plot::PlotPairs("Eigenspace CMC" + suffix, {"N", "Accuracy"}, infoRatioStrings, dataPoints, "lines", true);
+    Plot::PlotPairs("Eigenspace CMC" + suffix, {"N", "Accuracy"}, infoRatioStrings, dataPoints);
 
     std::cout << std::endl;
 }
@@ -137,8 +137,7 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
 
     std::vector<MisclassificationData> rocValues = ROC::GetROCValues(thresh, errorValues, classification);
 
-    std::cout << "Positive count: " << positiveCount << ", Negative count: " << negativeCount << std::endl;
-    ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"}, {positiveCount, negativeCount}, {false, true}, true);
+    ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"}, {positiveCount, negativeCount}, {false, true});
 }
 
 void ExperimentB(std::string trainDirectory, std::string testDirectory, std::string modelPath, std::string outputImagePath)

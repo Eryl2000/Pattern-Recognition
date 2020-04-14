@@ -33,7 +33,7 @@ namespace ROC
         }
 
         vector<MisclassificationData> ret;
-        std::cout << "Min: " << tRange.min << ", Max: " << tRange.max << ", Step: " << tRange.step << std::endl;
+        //std::cout << "Min: " << tRange.min << ", Max: " << tRange.max << ", Step: " << tRange.step << std::endl;
         ret.reserve(int((tRange.max - tRange.min) / tRange.step));
         // Should generate for [tRange.min, tRange.max] with step tRange.step
         for(float thresh = tRange.min; thresh <= tRange.max; thresh += tRange.step)
