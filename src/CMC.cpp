@@ -27,7 +27,7 @@ void GenerateCMC(std::string testingImagesDirectory, const Eigenface &eigenface,
 			}
 		}
 		float accuracy = numMatches / matches.size();
-		std::cout << "n: " << n << ", accuracy: " << accuracy << std::endl;
+		//std::cout << "n: " << n << ", accuracy: " << accuracy << std::endl;
 	}
 	
 }

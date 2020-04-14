@@ -27,6 +27,11 @@ public:
         falsePositives = 0;
         falseNegatives = 0;
     }
+    MisclassificationData(const MisclassificationData & other)
+    {
+        falsePositives = other.falsePositives;
+        falseNegatives = other.falseNegatives;
+    }
     int falsePositives;
     int falseNegatives;
 };

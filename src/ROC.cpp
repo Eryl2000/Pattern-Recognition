@@ -43,10 +43,10 @@ namespace ROC
             for(unsigned int i = 0; i < discriminants.size(); i++)
             {
                 bool belongsToClass = discriminants[i] >= thresh;
-                if(belongsToClass && !label[i])
+                if(!belongsToClass && label[i])
                 {
                     currentMisclass.falsePositives++;
-                } else if(!belongsToClass && label[i])
+                } else if(belongsToClass && !label[i])
                 {
                     currentMisclass.falseNegatives++;
                 }
@@ -95,41 +95,53 @@ namespace ROC
     }
 
     /*
-    Plot static helper function
+    Plot helper function
     Plots vector of ROC values
     */
-    void PlotROC(std::string name, const vector<vector<MisclassificationData>> & rocValues, vector<std::string> classifierNames, bool verbose)
+    void PlotROC(std::string name,
+                 const vector<vector<MisclassificationData>> & rocValues,
+                 vector<std::string> classifierNames,
+                 std::pair<int, int> totalPostiveNegatives,
+                 std::pair<bool, bool> invert, 
+                 bool verbose)
     {
         if(rocValues.size() != classifierNames.size())
         {
             throw std::invalid_argument("PlotROC: rocValues and classifierNames must have the same size!");
         }
 
-        vector<std::string> fileNames(classifierNames.size());
-        for(unsigned int i = 0; i < rocValues.size(); i++)
+        vector<vector<MisclassificationData>> values = rocValues;
+        vector<vector<std::pair<float, float>>> plotData(values.size());
+
+        for(unsigned int i = 0; i < values.size(); i++)
         {
-            fileNames[i] = "plots/" + name + "_" + classifierNames[i] + "_roc.dat";
-            Plot::createROCDataFile(fileNames[i], rocValues[i]);
+            plotData[i].resize(values[i].size());
+            for(unsigned int j = 0; j < values[i].size(); j++)
+            {
+                std::pair<float, float> point(values[i][j].falsePositives, values[i][j].falseNegatives);
+                point.first /= totalPostiveNegatives.first;
+                point.second /= totalPostiveNegatives.second;
+
+                if(invert.first)
+                {
+                    point.first = 1 - point.first;
+                }
+
+                if(invert.second)
+                {
+                    point.second = 1 - point.second;
+                }
+
+                plotData[i][j] = point;
+            }
         }
 
-        GnuplotPipe gp;
-        std::string plotString;
-        plotString += "set title '" + name + "' font ',20'\n";
-        plotString += "set xlabel 'False Positives'\n";
-        plotString += "set ylabel 'False Negatives'\n";
+        std::pair<std::string, std::string> axisNames;
+        axisNames.first = !invert.first ? "False Positives" : "True Negatives";
+        axisNames.second = !invert.second ? "False Negatives" : "True Positives";
 
-        plotString += "plot ";
-        std::vector<std::string> plotColors = {"red", "blue", "green", "yellow"};
-        for(unsigned int i = 0; i < rocValues.size(); i++)
-        {
-            plotString += "'" + fileNames[i] + "' with lines lw 3 lc rgb '" + plotColors[i % plotColors.size()] + "', ";
-        }
+        Plot::PlotPairs(name, axisNames, classifierNames, plotData, "lines", verbose);
 
-        if(verbose)
-        {
-            std::cout << plotString << std::endl;
-        }
-        gp.sendLine(plotString);
     }
 
     std::vector<int> ClassfyPixels(float thresh, vector<float> discriminants)

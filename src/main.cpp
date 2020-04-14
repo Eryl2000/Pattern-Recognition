@@ -101,6 +101,8 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
 
     std::vector<bool> classification(errorValues.size());
     std::unordered_set<std::string> intruderNames(eigenface.imageNames.begin(), eigenface.imageNames.begin() + eigenface.intruderCount);
+    int positiveCount = 0;
+    int negativeCount = 0;
 
     for(unsigned int i = 0; i < classification.size(); i++)
     {
@@ -109,10 +111,12 @@ void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::st
             return Eigenface::IsSameSubject(imageNames[i], intruderName);
         });
         classification[i] = intrusionMatch == intruderNames.end();
+        classification[i] ? positiveCount++ : negativeCount++;
     }
 
     std::vector<MisclassificationData> rocValues = ROC::GetROCValues(thresh, errorValues, classification);
 
     // TODO: Plot normalized ROC data (divide by total postives/negatives)
-    ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"});
+    std::cout << "Positive count: " << positiveCount << ", Negative count: " << negativeCount << std::endl;
+    ROC::PlotROC(plotName, {rocValues}, {"MahalanobisDistance"}, {positiveCount, negativeCount}, {false, true}, true);
 }

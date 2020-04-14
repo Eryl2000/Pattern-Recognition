@@ -18,7 +18,12 @@ namespace ROC
     ThresholdRange GetThresholdRange(vector<float> discriminants, int numThresholds);
     vector<MisclassificationData> GetROCValues(ThresholdRange tRange, vector<float> discriminants, vector<bool> data);
     float GetBestThreshold(ThresholdRange tRange, const vector<MisclassificationData> & rocValues, float fpToFnRatio);
-    void PlotROC(std::string name, const vector<vector<MisclassificationData>> & rocValues, vector<std::string> classifierNames, bool verbose = false);
+    void PlotROC(std::string name,
+                 const vector<vector<MisclassificationData>> & rocValues,
+                 vector<std::string> classifierNames,
+                 std::pair<int, int> totalPostiveNegatives,
+                 std::pair<bool, bool> invert = {false, false}, 
+                 bool verbose = false);
     std::vector<int> ClassfyPixels(float thresh, vector<float> discriminants);
 
     class ThresholdRange
