@@ -74,6 +74,8 @@ namespace Plot
         plotString += "set title '" + chartName + "' font ',20'\n";
         plotString += "set xlabel '" + axisNames.first + "'\n";
         plotString += "set ylabel '" + axisNames.second + "'\n";
+        plotString += "set grid xtics lt 0 lw 1 lc rgb '#bbbbbb'\n";
+        plotString += "set grid ytics lt 0 lw 1 lc rgb '#bbbbbb'\n";
         plotString += "plot ";
 
         for(unsigned int i = 0; i < data.size(); i++)
