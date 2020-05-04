@@ -20,12 +20,12 @@ namespace Eigenloader
             vector<Data> trainingData = LoadTrainingData(fileDirectory, i + 1, eigenspaceCount);
             vector<Data> testingData = LoadTestingData(fileDirectory, i + 1, eigenspaceCount);
 
-            NormalizationFactors normal;
+            vector<NormalizationFactors> normals;
             // Find normal factors with training set
-            trainingData = NormalizeData(trainingData, normal, true);
+            trainingData = NormalizeData(trainingData, normals, true);
 
             // Apply training normalization to testing set
-            testingData = NormalizeData(testingData, normal);
+            testingData = NormalizeData(testingData, normals);
 
             fullData[i][0] = trainingData;
             fullData[i][1] = testingData;
@@ -91,13 +91,60 @@ namespace Eigenloader
         return data;
     }
 
-    vector<Data> NormalizeData(const vector<Data> & data, NormalizationFactors & normal, bool computeNormal)
+    vector<Data> NormalizeData(const vector<Data> & data, vector<NormalizationFactors> & normal, bool computeNormal)
     {
-        return data;
+        if(computeNormal)
+        {
+            normal = GetNormalizationFactors(data);
+        }
+
+        vector<Data> normalData(data.size());
+
+        for(unsigned int i = 0; i < data.size(); i++)
+        {
+            normalData[i] = Data(normal.size());
+        }
+
+        for(unsigned int i = 0; i < normal.size(); i++)
+        {
+            float min = normal[i].min;
+            float max = normal[i].max;
+            for(unsigned int j = 0; j < data.size(); j++)
+            {
+                float feature = data[j].feature[i];
+                normalData[j].feature[i] = 2 * (feature - min) / (max - min) - 1;
+            }
+        }
+        return normalData;
     }
 
-    NormalizationFactors GetNormalizationFactors(const vector<Data> & data)
+    vector<NormalizationFactors> GetNormalizationFactors(const vector<Data> & data)
     {
+        if(data.size() == 0)
+        {
+            throw std::invalid_argument("Eigenloader GetNormalizationFactors passed empty data");
+        }
 
+        int featureCount = data[0].feature.size();
+        vector<NormalizationFactors> normals(featureCount);
+        for(int i = 0; i < featureCount; i++)
+        {
+            normals[i] = NormalizationFactors(data[0].feature[i], data[0].feature[i]);
+            for(unsigned int j = 1; j < data.size(); j++)
+            {
+                float feature = data[j].feature[i];
+                if(feature < normals[i].min)
+                {
+                    normals[i].min = feature;
+                }
+
+                if(feature > normals[i].max)
+                {
+                    normals[i].max = feature;
+                }
+            }
+        }
+
+        return normals;
     }
 }

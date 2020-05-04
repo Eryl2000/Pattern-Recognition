@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
     vector<std::pair<string, float>> resultsHighRes = PerformExperiment(dataHighRes);
     OutputExperimentResults(resultsHighRes);
 
-
     std::cout << "  Loading Low Res Data" << std::endl;
     vector<vector<vector<Data>>> dataLowRes = Eigenloader::LoadFullData(DATA_FOLDER + LOW_RES_FOLDER, 3, EIGENSPACE_COUNT);
     std::cout << "  Performing Low Res Experiment" << std::endl;

@@ -53,11 +53,9 @@ namespace Eigenloader
     vector<Data> LoadData(string fileDirectory, int foldNumber, string setType, int eigenspaceCount);
     vector<Data> LoadData(Eigenset dataSet, int eigenspaceCount);
 
-    // If normal is NULL, normalization factors will be found and passed through normal
-    // If normal is not NULL, data will be normalized by factors
-    vector<Data> NormalizeData(const vector<Data> & data, NormalizationFactors & normal, bool computeNormal = false);
+    vector<Data> NormalizeData(const vector<Data> & data, vector<NormalizationFactors> & normal, bool computeNormal = false);
 
-    NormalizationFactors GetNormalizationFactors(const vector<Data> & data);
+    vector<NormalizationFactors> GetNormalizationFactors(const vector<Data> & data);
 }
 
 #endif
