@@ -9,6 +9,7 @@
 #include "Image.h"
 #include "Eigenface.h"
 #include "CMC.h"
+#include "svm.h"
 
 void TestReconstruction(const Eigenface & eigenface, std::string outputImagePath);
 void GenerateROCCurve(const Eigenface & eigenface, std::string plotName, std::string testingImageDirectory);
