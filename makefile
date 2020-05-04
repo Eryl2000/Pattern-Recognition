@@ -1,4 +1,4 @@
-EXE = Project3.exe
+EXE = Project4.exe
 
 SRC_DIR = src
 OBJ_DIR = obj

@@ -1,6 +1,0 @@
-set title 'Eigenspace CMC_H_L' font ',20'
-set xlabel 'N'
-set ylabel 'Accuracy'
-set grid xtics lt 0 lw 1 lc rgb '#bbbbbb'
-set grid ytics lt 0 lw 1 lc rgb '#bbbbbb'
-plot 'plots/Eigenspace CMC_H_80.000000%.plot' with lines lw 3 lc rgb 'red', 'plots/Eigenspace CMC_H_90.000000%.plot' with lines lw 3 lc rgb 'blue', 'plots/Eigenspace CMC_H_95.000000%.plot' with lines lw 3 lc rgb 'green', 'plots/Eigenspace CMC_L_80.000000%.plot' with lines lw 3 lc rgb 'yellow', 'plots/Eigenspace CMC_L_90.000000%.plot' with lines lw 3 lc rgb 'purple', 'plots/Eigenspace CMC_L_95.000000%.plot' with lines lw 3 lc rgb 'cyan'
