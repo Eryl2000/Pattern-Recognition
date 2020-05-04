@@ -41,9 +41,9 @@ vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Da
     vector<std::pair<string, float>> errorRates;
 
     // SVM Classifier
-    // C = 1, 10, 100, 100
+    // C = 0.1, 1, 10, 100, 100
         // Polynomial degree = 1, 2, 3; gamma = 1, coef0 = 0
-        // RBF gamma = 1, 10, 100
+        // RBF gamma = 0.1, 1, 10, 100
     vector<double> C = {0.1, 1, 10, 100, 1000};
     vector<double> DEGREE = {1, 2, 3};
     vector<double> GAMMA = {0.1, 1, 10, 100};
@@ -61,7 +61,7 @@ vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Da
 
     for(unsigned int i = 0; i < svmErrorRate.size(); i++)
     {
-        errorRates[i] = {SVMHelp::GetParameterString(params[i]), svmErrorRate[i]};
+        errorRates[i] = {SVMHelp::GetParameterString(params[i]), 1 -svmErrorRate[i]};
     }
 
 
@@ -72,6 +72,7 @@ vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Da
 
 void OutputExperimentResults(vector<std::pair<string, float>> results)
 {
+    std::cout << "RESULTS" << std::endl;
     for(unsigned int i = 0; i < results.size(); i++)
     {
         std::cout << "    " << results[i].first << ": " << std::to_string(results[i].second) << std::endl;

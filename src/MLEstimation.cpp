@@ -24,6 +24,7 @@ namespace MLEstimation
 
     MatrixXf GetSampleCovariance(const vector<Data> & data, VectorXf * mean)
     {
+        // TODO: This is not how this works
         if(mean == NULL)
         {
             *mean = GetSampleMean(data);
