@@ -4,10 +4,11 @@
 #include "MLEstimation.h"
 #include "Eigenloader.h"
 #include "Data.h"
+#include "SVMHelp.h"
 
 using std::string, std::vector;
 
-vector<std::pair<string, float>> PerformExperiment(vector<vector<vector<Data>>> data);
+vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Data>>> & data);
 void OutputExperimentResults(vector<std::pair<string, float>> results);
 
 int main(int argc, char *argv[])
@@ -35,16 +36,38 @@ int main(int argc, char *argv[])
 }
 
 // Pairs of classifier types and error rate
-vector<std::pair<string, float>> PerformExperiment(vector<vector<vector<Data>>> data)
+vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Data>>> & data)
 {
+    vector<std::pair<string, float>> errorRates;
+
     // SVM Classifier
     // C = 1, 10, 100, 100
         // Polynomial degree = 1, 2, 3; gamma = 1, coef0 = 0
         // RBF gamma = 1, 10, 100
+    vector<double> C = {1, 10, 100, 1000};
+    vector<double> DEGREE = {1, 2, 3};
+    vector<double> GAMMA = {1, 10, 100};
+    vector<svm_parameter> params = SVMHelp::GetTrainingParameters(C, DEGREE, GAMMA);
+    errorRates.resize(params.size());
+
+    // TODO: Teardown the models and parameters
+    vector<vector<svm_model *>> models = SVMHelp::TrainModels(data, params);
+    vector<float> svmErrorRate = SVMHelp::GetSVMErrorRate(models, data);
+
+    if(params.size() != svmErrorRate.size())
+    {
+        throw std::runtime_error("SVM error rate should be the same size as the parameter count");
+    }
+
+    for(unsigned int i = 0; i < svmErrorRate.size(); i++)
+    {
+        errorRates[i] = {SVMHelp::GetParameterString(params[i]), svmErrorRate[i]};
+    }
+
 
     // Bayes Classifier
 
-    return {{"Nothing here", -1}};
+    return errorRates;
 }
 
 void OutputExperimentResults(vector<std::pair<string, float>> results)

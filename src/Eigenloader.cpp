@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 namespace Eigenloader
 {
@@ -76,7 +77,7 @@ namespace Eigenloader
                     // Get label from label file
                     int labelValue;
                     label >> labelValue;
-                    newData.label =  labelValue;
+                    newData.label = labelValue;
 
                     data.push_back(newData);
                 }
@@ -102,7 +103,7 @@ namespace Eigenloader
 
         for(unsigned int i = 0; i < data.size(); i++)
         {
-            normalData[i] = Data(normal.size());
+            normalData[i] = Data(data[i]);
         }
 
         for(unsigned int i = 0; i < normal.size(); i++)

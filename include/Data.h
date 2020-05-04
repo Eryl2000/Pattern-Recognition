@@ -15,7 +15,12 @@ public:
     }
     Data()
     {
-        
+        label = 0;
+    }
+    Data(const Data & other)
+    {
+        feature = other.feature;
+        label = other.label;
     }
     VectorXf feature;
     int label;
