@@ -101,13 +101,13 @@ namespace SVMHelp
         if(param.kernel_type == POLY)
         {
             paramString += "POLY:";
-            paramString += " C=" + std::to_string((int)param.C);
+            paramString += " C=" + std::to_string(param.C);
             paramString += " degree=" + std::to_string((int)param.degree);
         } else if(param.kernel_type == RBF)
         {
             paramString += "RBF:";
             paramString += " C=" + std::to_string((int)param.C);
-            paramString += " gamma=" + std::to_string((int)param.gamma);
+            paramString += " gamma=" + std::to_string(param.gamma);
         } else
         {
             paramString = "INVALID PARAM KERNEL TYPE";
@@ -146,6 +146,7 @@ namespace SVMHelp
             models[i] = std::vector<svm_model*>(parameters.size());
             for(unsigned int j = 0; j < parameters.size(); j++)
             {
+                std::cout << std::endl << "TRAINING - " << GetParameterString(parameters[j]) << std::endl;
                 models[i][j] = TrainModel(parameters[j], data[i][0]);
             }
         }

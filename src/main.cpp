@@ -44,9 +44,9 @@ vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Da
     // C = 1, 10, 100, 100
         // Polynomial degree = 1, 2, 3; gamma = 1, coef0 = 0
         // RBF gamma = 1, 10, 100
-    vector<double> C = {1, 10, 100, 1000};
+    vector<double> C = {0.1, 1, 10, 100, 1000};
     vector<double> DEGREE = {1, 2, 3};
-    vector<double> GAMMA = {1, 10, 100};
+    vector<double> GAMMA = {0.1, 1, 10, 100};
     vector<svm_parameter> params = SVMHelp::GetTrainingParameters(C, DEGREE, GAMMA);
     errorRates.resize(params.size());
 
