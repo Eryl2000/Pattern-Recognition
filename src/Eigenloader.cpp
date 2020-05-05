@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 namespace Eigenloader
 {
@@ -33,6 +34,52 @@ namespace Eigenloader
         }
 
         return fullData;
+    }
+
+    vector<vector<Data>> SeperateClasses(const vector<Data> & data, int classLabel1, int classLabel2)
+    {
+        vector<vector<Data>> seperatedData(2);
+
+        vector<Data> class1;
+        vector<Data> class2;
+        for(unsigned int i = 0; i < data.size(); i++)
+        {
+            if(data[i].label == classLabel1)
+            {
+                class1.push_back(data[i]);
+            } else if(data[i].label == classLabel2)
+            {
+                class2.push_back(data[i]);
+            } else
+            {
+                throw std::invalid_argument("Eigenloader SeperateClasses encountered a data point that did not belong to the passed classes");
+            }
+            
+        }
+
+        seperatedData[0] = class1;
+        seperatedData[1] = class2;
+
+        return seperatedData;
+
+    }
+
+    // Using FullData format, returns class1, class2, testing data for each fold
+    vector<vector<vector<Data>>> SeperateFullData(const vector<vector<vector<Data>>> & data, int classLabel1, int classLabel2)
+    {
+        vector<vector<vector<Data>>> seperatedData(data.size());
+        for(unsigned int i = 0; i < data.size(); i++)
+        {
+            vector<vector<Data>> seperated = SeperateClasses(data[i][0], classLabel1, classLabel2);
+            vector<vector<Data>> foldData(3);
+            foldData[0] = seperated[0];
+            foldData[1] = seperated[1];
+            foldData[2] = data[i][1];
+
+            seperatedData[i] = foldData;
+        }
+
+        return seperatedData;
     }
 
     vector<Data> LoadTrainingData(string fileDirectory, int foldNumber, int eigenspaceCount)

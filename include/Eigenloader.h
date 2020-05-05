@@ -47,6 +47,9 @@ namespace Eigenloader
     // For training and testing sets
     vector<vector<vector<Data>>> LoadFullData(string fileDirectory, int foldCount, int eigenspaceCount);
 
+    vector<vector<Data>> SeperateClasses(const vector<Data> & data, int classLabel1, int classLabel2);
+    vector<vector<vector<Data>>> SeperateFullData(const vector<vector<vector<Data>>> & data, int classLabel1, int classLabel2);
+
     vector<Data> LoadTrainingData(string fileDirectory, int foldNumber, int eigenspaceCount);
     vector<Data> LoadTestingData(string fileDirectory, int foldNumber, int eigenspaceCount);
 

@@ -12,9 +12,11 @@ public:
     Data(int featureSize)
     {
         feature.resize(featureSize);
+        label = 0;
     }
     Data()
     {
+        feature = VectorXf::Zero(1);
         label = 0;
     }
     Data(const Data & other)

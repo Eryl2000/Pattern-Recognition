@@ -5,6 +5,7 @@
 #include "Eigenloader.h"
 #include "Data.h"
 #include "SVMHelp.h"
+#include "ClassifierCase3.h"
 
 using std::string, std::vector;
 
@@ -66,6 +67,23 @@ vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Da
 
 
     // Bayes Classifier
+    vector<vector<vector<Data>>> seperatedData = Eigenloader::SeperateFullData(data, 1, 2);
+    float totalError = 0;
+
+    for(unsigned int i = 0; i < seperatedData.size(); i++)
+    {
+        VectorXf mean1 = MLEstimation::GetSampleMean(seperatedData[i][0]);
+        MatrixXf covariance1 = MLEstimation::GetSampleCovariance(seperatedData[i][0]);
+        VectorXf mean2 = MLEstimation::GetSampleMean(seperatedData[i][1]);
+        MatrixXf covariance2 = MLEstimation::GetSampleCovariance(seperatedData[i][1]);
+
+        ClassifierCase3 bayes({mean1, mean2}, {covariance1, covariance2}, {0.5, 0.5});
+        totalError += bayes.GetErrorRate(seperatedData[i][2]);
+    }
+
+    totalError /= seperatedData.size();
+
+    errorRates.push_back({"Bayes", 1 - totalError});
 
     return errorRates;
 }

@@ -20,7 +20,7 @@ using std::vector;
 namespace MLEstimation
 {
     VectorXf GetSampleMean(const vector<Data> & data);
-    MatrixXf GetSampleCovariance(const vector<Data> & data, VectorXf * mean=NULL);
+    MatrixXf GetSampleCovariance(const vector<Data> & data);
     vector<Data> GetRandomSample(const vector<Data> & data, float sampleRatio);
 }
 

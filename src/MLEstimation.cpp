@@ -22,19 +22,15 @@ namespace MLEstimation
     }
 
 
-    MatrixXf GetSampleCovariance(const vector<Data> & data, VectorXf * mean)
+    MatrixXf GetSampleCovariance(const vector<Data> & data)
     {
-        // TODO: This is not how this works
-        if(mean == NULL)
-        {
-            *mean = GetSampleMean(data);
-        }
+        VectorXf mean = GetSampleMean(data);
 
-        MatrixXf covariance = MatrixXf::Zero(mean->size(), mean->size());
-        MatrixXf centered = MatrixXf::Zero(mean->size(), data.size());
+        MatrixXf covariance = MatrixXf::Zero(mean.size(), mean.size());
+        MatrixXf centered = MatrixXf::Zero(mean.size(), data.size());
         for(unsigned int i = 0; i < data.size(); i++)
         {
-            centered.block(0, i, mean->size(), 1) = data[i].feature - *mean;
+            centered.block(0, i, mean.size(), 1) = data[i].feature - mean;
         }
 
         covariance = (centered * centered.adjoint()) / float(data.size() - 1);
