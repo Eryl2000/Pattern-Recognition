@@ -7,7 +7,8 @@
 #include "SVMHelp.h"
 #include "ClassifierCase3.h"
 
-using std::string, std::vector;
+using std::string;
+using std::vector;
 
 vector<std::pair<string, float>> PerformExperiment(const vector<vector<vector<Data>>> & data);
 void OutputExperimentResults(vector<std::pair<string, float>> results);

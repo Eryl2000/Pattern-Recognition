@@ -8,7 +8,8 @@
 #include "Data.h"
 
 using namespace Eigen;
-using std::vector, std::string;
+using std::vector;
+using std::string;
 
 namespace Eigenloader
 {
